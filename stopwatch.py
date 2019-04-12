@@ -1,3 +1,4 @@
+# coding=utf-8
 import time
 import queue
 import tkinter as tk
@@ -11,6 +12,7 @@ class StopWatch(object):
     def __init__(self, parent):
         # Store time points from which we'll calculate delta values
         self._times = []
+        self._is_running = False
 
         self._parent = parent
         self._parent.title('Raspberry Stage Display')
@@ -56,26 +58,21 @@ class StopWatch(object):
 
     @property
     def is_running(self):
-        return len(self._times) > 0
+        return self._is_running
 
     def start_watch(self):
+        self._is_running = True
         self._times.append(time.time())
 
+    def stop_watch(self):
+        self._is_running = False
+
     def reset_watch(self):
+        self._is_running = False
         self._times = []
 
     def measure_split_time(self):
         self._times.append(time.time())
-
-    # def print_times(self):
-    #     if len(self._times) <= 1:
-    #         return
-    #
-    #     start = self._times[0]
-    #     for idx in range(1, len(self._times)):
-    #         val = self._times[idx]
-    #
-    #         print('{}. mezicas: {}'.format(idx, val - start))
 
     def _listen_for_result(self):
         """ Check if there is something in the queue. """
@@ -85,18 +82,33 @@ class StopWatch(object):
 
             return "{0:02d}:{1:06.3f}".format(minutes, float(timedelta - (minutes * 60)))
 
-        def clear_data():
-            self._text_label['text'] = ''
+        def _format_split_time_records():
+            split_time_record = ""
+            if len(self._times) > 1:
+                for idx in range(1, len(self._times)):
+                    if idx is not 1:
+                        split_time_record += '\n'
+
+                    split_time = self._times[idx]
+                    split_time_record += '{0}. mezičas: {1}'.format(idx,
+                                                                    _format_time(split_time - self._times[0]))
+            return split_time_record
 
         # stop watch is running
         if self.is_running:
-            self._text_label['text'] = _format_time(time.time() - self._times[0])
-        else:
-            try:
-                pass
+            current_time = _format_time(time.time() - self._times[0])
+            self._text_label['text'] = current_time + '\n' + _format_split_time_records()
 
-            except queue.Empty:
-                pass
+        elif len(self._times) > 0:
+            self._text_label['text'] = _format_split_time_records()
+
+        # FIXME: Implement
+        # Update data from queue
+        try:
+            pass
+
+        except queue.Empty:
+            pass
 
         self._parent.after(self.SCREEN_REFRESH_MS, self._listen_for_result)
 
@@ -106,4 +118,3 @@ if __name__ == "__main__":
     stopwatch = StopWatch(root)
     stopwatch.start_watch()
     root.mainloop()
-
