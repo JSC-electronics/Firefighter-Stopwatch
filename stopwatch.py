@@ -116,5 +116,4 @@ class StopWatch(object):
 if __name__ == "__main__":
     root = tk.Tk()
     stopwatch = StopWatch(root)
-    stopwatch.start_watch()
     root.mainloop()
