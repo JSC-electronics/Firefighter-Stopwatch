@@ -5,10 +5,11 @@ from tkinter import ttk
 
 
 class StopWatch(object):
-    SCREEN_REFRESH_MS = 100
+    SCREEN_REFRESH_MS = 40
     TEXT_WRAP_PADDING_PX = 200
 
     def __init__(self, parent):
+        # Store time points from which we'll calculate delta values
         self._times = []
 
         self._parent = parent
@@ -43,9 +44,7 @@ class StopWatch(object):
                                      wraplength=self._parent.winfo_screenwidth() - self.TEXT_WRAP_PADDING_PX,
                                      justify='center')
         self._text_label.grid(column=0, row=0)
-
-        # Show current IP address after start
-        self._text_label['text'] = 'Číselník'
+        self._text_label['text'] = '00:00.000'
 
         # Queue for UI thread to update components
         self._thread_queue = queue.Queue()
@@ -54,6 +53,10 @@ class StopWatch(object):
     # noinspection PyUnusedLocal
     def close(self, *args):
         self._parent.quit()
+
+    @property
+    def is_running(self):
+        return len(self._times) > 0
 
     def start_watch(self):
         self._times.append(time.time())
@@ -64,38 +67,43 @@ class StopWatch(object):
     def measure_split_time(self):
         self._times.append(time.time())
 
-    def print_times(self):
-        if len(self._times) <= 1:
-            return
-
-        start = self._times[0]
-        for idx in range(1, len(self._times)):
-            val = self._times[idx]
-
-            print('{}. mezicas: {}'.format(idx, val - start))
-
-    @staticmethod
-    def _format_time(timedelta):
-        hours = int(timedelta / 60*60*1000)
-        minutes = int(timedelta / 60*1000) - hours * 60
-        seconds = int(timedelta / 1000)
+    # def print_times(self):
+    #     if len(self._times) <= 1:
+    #         return
+    #
+    #     start = self._times[0]
+    #     for idx in range(1, len(self._times)):
+    #         val = self._times[idx]
+    #
+    #         print('{}. mezicas: {}'.format(idx, val - start))
 
     def _listen_for_result(self):
         """ Check if there is something in the queue. """
 
+        def _format_time(timedelta):
+            minutes = int(int(timedelta) / 60)
+
+            return "{0:02d}:{1:06.3f}".format(minutes, float(timedelta - (minutes * 60)))
+
         def clear_data():
             self._text_label['text'] = ''
 
-        try:
-            pass
+        # stop watch is running
+        if self.is_running:
+            self._text_label['text'] = _format_time(time.time() - self._times[0])
+        else:
+            try:
+                pass
 
-        except queue.Empty:
-            pass
+            except queue.Empty:
+                pass
 
         self._parent.after(self.SCREEN_REFRESH_MS, self._listen_for_result)
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    StopWatch(root)
+    stopwatch = StopWatch(root)
+    stopwatch.start_watch()
     root.mainloop()
+
