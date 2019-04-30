@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="100"
+   width="100"
+   id="svg12"
+   xml:space="preserve"
+   enable-background="new 0 0 100 100"
+   viewBox="0 0 100 100"
+   y="0px"
+   x="0px"
+   version="1.0"><metadata
+     id="metadata18"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs16"><marker
+   style="overflow:visible"
+   id="Arrow1Send"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Lend"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.8,0,0,-0.8,-10,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5541" /></marker>
+	
+
+		
+	<clipPath
+   id="a"><path
+     style="fill:none"
+     d="M 3,4 H 108 V 109 H 3 Z"
+     id="path4858" /></clipPath><marker
+   style="overflow:visible"
+   id="Arrow1Send-8"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-4" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Send-6"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-46" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Send-1"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-3" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Send-9"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-2" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Send-99"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-9" /></marker><marker
+   style="overflow:visible"
+   id="Arrow1Send-80"
+   refX="0"
+   refY="0"
+   orient="auto"><path
+     transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff1616;stroke-width:1.00000003pt;stroke-opacity:1"
+     d="M 0,0 5,-5 -12.5,0 5,5 Z"
+     id="path5553-6" /></marker><clipPath
+   clipPathUnits="userSpaceOnUse"
+   id="clipPath18"><path
+     d="M 0,360 H 841.89 V 0 H 0 Z"
+     id="path16" /></clipPath><linearGradient
+   x1="0"
+   y1="0"
+   x2="1"
+   y2="0"
+   gradientUnits="userSpaceOnUse"
+   gradientTransform="matrix(-6.9e-6,158.73975,-158.73975,-6.9e-6,171.5,108.625)"
+   spreadMethod="pad"
+   id="linearGradient116"><stop
+     style="stop-opacity:1;stop-color:#035656"
+     offset="0"
+     id="stop110" /><stop
+     style="stop-opacity:1;stop-color:#05acac"
+     offset="0.99773514"
+     id="stop112" /><stop
+     style="stop-opacity:1;stop-color:#05acac"
+     offset="1"
+     id="stop114" /></linearGradient><clipPath
+   clipPathUnits="userSpaceOnUse"
+   id="clipPath126"><path
+     d="M 0,360 H 841.89 V 0 H 0 Z"
+     id="path124" /></clipPath><clipPath
+   clipPathUnits="userSpaceOnUse"
+   id="clipPath9148"><path
+     d="M 0,360 H 841.89 V 0 H 0 Z"
+     id="path9146" /></clipPath><clipPath
+   clipPathUnits="userSpaceOnUse"
+   id="clipPath9256"><path
+     d="M 0,360 H 841.89 V 0 H 0 Z"
+     id="path9254" /></clipPath>
+
+
+
+
+
+
+
+
+
+</defs><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4629">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4631">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4633">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4635">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4637">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4639">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4641">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4643">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4645">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4647">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4649">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4651">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4653">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4655">
+</g><g
+     transform="rotate(-90,155.93195,390.74601)"
+     id="g4657">
+</g><g
+     transform="translate(-350,-150.00001)"
+     id="layer2">
+
+<g
+   transform="translate(-24.57627,-113.55931)"
+   id="g5050"><path
+   id="path4865-5"
+   d="m 447.46198,332.75932 a 29.87619,29.87619 0 1 0 -45.77142,0 l 1.4,1.66667 -5.89524,4.94286 1.64762,1.9619 5.89524,-4.94286 -1.64762,-1.9619 -3.34286,2.8 -1.36191,-1.66667 a 34.285714,34.285714 0 0 1 -7.80952,-18.34285 l -3.35238,0.23809 -0.18095,-2.5619 3.35238,-0.2381 v -1.10476 a 34.095238,34.095238 0 0 1 8.73333,-22.85714 l -2.41905,-2.33334 1.78096,-1.84762 2.41904,2.33334 a 34.114286,34.114286 0 0 1 22.42858,-9.52381 v -3.33334 h 2.5619 v 3.36191 a 34.104762,34.104762 0 0 1 22.42857,9.52381 l 2.41905,-2.33334 1.78095,1.84762 -2.41905,2.33334 a 34.095238,34.095238 0 0 1 8.73334,22.85714 v 1.10476 l 3.35238,0.2381 -0.18095,2.5619 -3.35239,-0.23809 a 34.285714,34.285714 0 0 1 -7.89523,18.31428 l -1.4,1.66667 2.55238,2.14286 -1.64762,1.9619 -5.89524,-4.94286 1.64762,-1.9619 z"
+   style="fill:#000000;stroke-width:0.95238096" /><path
+   id="path4867-1"
+   d="m 414.65246,319.52123 3.55238,3.70476 4.44762,-4.91429 a 5.1238095,5.1238095 0 0 0 6.45714,-7.13333 l 13.60953,-15.00952 -15.58095,12.9619 a 5.1142857,5.1142857 0 0 0 -7.39048,6.14286 z"
+   style="fill:#000000;stroke-width:0.95238096" /><path
+   id="path4869-2"
+   d="m 424.57627,271.24504 a 42.314286,42.314286 0 1 1 -42.31429,42.31428 42.323809,42.323809 0 0 1 42.31429,-42.31428 m 0,-7.68572 a 50,50 0 1 0 50,50 50,50 0 0 0 -50,-50"
+   style="fill:#000000;stroke-width:4.76190472;stroke-miterlimit:4;stroke-dasharray:none" /><g
+   id="g5037"
+   transform="translate(0.43521267)"><text
+   id="text4901-0"
+   y="332.12537"
+   x="401.73248"
+   style="font-style:normal;font-weight:normal;font-size:5.07936525px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.95238096"
+   xml:space="preserve"><tspan
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.61904764px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.95238096"
+     y="332.12537"
+     x="401.73248"
+     id="tspan4899-3">0</tspan></text>
+
+
+<text
+   id="text4901-4-1"
+   y="332.12537"
+   x="435.19547"
+   style="font-style:normal;font-weight:normal;font-size:5.07936525px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.95238096"
+   xml:space="preserve"><tspan
+     id="tspan4921-9"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.95238096"
+     y="332.12537"
+     x="435.19547">80</tspan></text>
+
+
+</g><text
+   xml:space="preserve"
+   style="font-style:normal;font-weight:normal;font-size:5.07936525px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.95238096"
+   x="413.53329"
+   y="342.21121"
+   id="text4925-4"><tspan
+     id="tspan4923-6"
+     x="413.53329"
+     y="342.21121"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.95238096">x100</tspan><tspan
+     x="413.53329"
+     y="352.21121"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.95238096"
+     id="tspan5031">RPM</tspan></text>
+
+
+</g>
+
+
+
+
+
+
+
+</g><g
+     transform="translate(-350,-150.00001)"
+     style="display:none"
+     id="layer1"><text
+   id="text5421"
+   y="660.78217"
+   x="55.357456"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="660.78217"
+     x="55.357456"
+     id="tspan5419">Mezičasy</tspan></text>
+
+
+<text
+   id="text5425"
+   y="643.81409"
+   x="316.44238"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     y="643.81409"
+     x="316.44238"
+     id="tspan5423">Otáčky motoru</tspan><tspan
+     id="tspan5474"
+     y="677.1474"
+     x="316.44238">(1/min)</tspan></text>
+
+
+<text
+   id="text5421-3"
+   y="55.660248"
+   x="883.18756"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="55.660248"
+     x="883.18756"
+     id="tspan5419-7">Průtok před PS12 (l/min)</tspan><tspan
+     id="tspan5445"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="108.99358"
+     x="883.18756" /></text>
+
+
+<text
+   id="text5421-3-5"
+   y="428.28009"
+   x="835.9588"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     id="tspan5468"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="428.28009"
+     x="835.9588">Tlak před PS12 (bar)</tspan><tspan
+     id="tspan5445-2"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="481.61343"
+     x="835.9588" /></text>
+
+
+<text
+   id="text5421-3-2"
+   y="-14.26407"
+   x="259.51639"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     id="tspan5445-9"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="-14.26407"
+     x="259.51639">Průběžný čas od startu</tspan></text>
+
+
+<text
+   id="text5421-3-20"
+   y="265.47098"
+   x="925.02106"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     id="tspan5511"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="265.47098"
+     x="925.02106">Průtok za PS12 (l/min)</tspan><tspan
+     id="tspan5445-4"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="318.80432"
+     x="925.02106" /></text>
+
+
+<text
+   id="text5421-3-5-1"
+   y="582.17413"
+   x="878.61652"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.66666794px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+   xml:space="preserve"><tspan
+     id="tspan5468-7"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="582.17413"
+     x="878.61652">Tlak za PS12 (bar)</tspan><tspan
+     id="tspan5445-2-6"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.66666603px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1"
+     y="635.50745"
+     x="878.61652" /></text>
+
+
+<path
+   id="path5536"
+   d="m 150,620 c 60,-80 60,-80 60,-80"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send)" /><path
+   id="path5536-5"
+   d="m 380,600 10,-60"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-8)" /><path
+   id="path5536-54"
+   d="M 900,70 520,330"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-6)" /><path
+   id="path5536-6"
+   d="M 910,260 620,340"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-1)" /><path
+   id="path5536-3"
+   d="M 820,420 710,380"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-9)" /><path
+   id="path5536-9"
+   d="M 870,570 760,530"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-99)" /><path
+   id="path5536-7"
+   d="m 370,0 20,80"
+   style="fill:#ff0000;fill-opacity:1;stroke:#ff1616;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Send-80)" /></g></svg>
