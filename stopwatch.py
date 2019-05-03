@@ -3,9 +3,14 @@ import logging
 import time
 import queue
 import tkinter as tk
+import csv
 from tkinter import ttk
 from PIL import ImageTk
 from gpiozero import Button
+from pathlib import Path
+from datetime import datetime as dtime
+
+CSV_FILE_PATH = '/home/vzahradnik/Dokumenty/stopwatch_log.csv'
 
 
 class MainApp(object):
@@ -191,6 +196,28 @@ class MainApp(object):
                                  flow=cleared_flow, pressure=cleared_pressure,
                                  is_manual_measure=True)
 
+        def write_log_to_csv(checkpoint='', split_time='', flow='', rpm='',
+                             pressure_1='', pressure_2='', is_manual_measure=False):
+            write_header = False
+            header = ['Datum a čas měření', 'Stanoviště', 'Čas', 'Průtok (l/min)',
+                      'Otáčky motoru (1/min)', 'Tlak #1 (bar)', 'Tlak #2 (bar)',
+                      'Příznak automatické/manuální měření {A, M}']
+
+            data = [dtime.now().isoformat(), checkpoint, split_time, flow, rpm, pressure_1, pressure_2,
+                    'A' if not is_manual_measure else 'M']
+
+            csv_file = Path(CSV_FILE_PATH)
+            if not csv_file.exists():
+                write_header = True
+
+            with open(CSV_FILE_PATH, 'a', newline='') as f:
+                writer = csv.writer(f)
+
+                if write_header:
+                    writer.writerow(header)
+
+                writer.writerow(data)
+
         update_ui_stopwatch_time(self._stopwatch.get_current_time())
 
         try:
@@ -206,23 +233,37 @@ class MainApp(object):
 
                 for eventKey, eventValue in event.items():
                     if eventKey == StopWatch.SPLIT_TIME_MEASURED:
+                        checkpoint = event.get(StopWatch.CHECKPOINT)
+                        flow = str(self._flowmeter.get_current_flow())
+                        pressure = self._pressure.get_current_pressure()
+                        rpm = str(self._rpmmeter.get_current_rpm())
+
                         set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue,
-                                             rpm=str(self._rpmmeter.get_current_rpm()),
-                                             flow='{}/{}'.format(self._flowmeter.get_current_flow(),
-                                                                 self._flowmeter.get_average_flow()),
-                                             pressure=self._pressure.get_current_pressure())
+                                             rpm=rpm, flow=flow,
+                                             pressure='{}/{}'.format(pressure[0], pressure[1]))
                         self._auto_measurement_rows_populated += 1
+
+                        if checkpoint:
+                            write_log_to_csv(checkpoint=checkpoint, split_time=eventValue,
+                                             flow=flow, rpm=rpm, pressure_1=str(pressure[0]),
+                                             pressure_2=str(pressure[1]))
+
                     elif eventKey == StopWatch.MANUAL_MEASURE_STARTED:
+                        checkpoint = event.get(StopWatch.CHECKPOINT)
+                        flow = str(self._flowmeter.get_current_flow())
+                        pressure = self._pressure.get_current_pressure()
+                        rpm = str(self._rpmmeter.get_current_rpm())
+
                         set_measurement_data(is_manual_measure=True, split_time=eventValue,
-                                             rpm=str(self._rpmmeter.get_current_rpm()),
-                                             flow='{}/{}'.format(self._flowmeter.get_current_flow(),
-                                                                 self._flowmeter.get_average_flow()),
-                                             pressure=self._pressure.get_current_pressure())
-                    elif eventKey == StopWatch.CHECKPOINT:
-                        checkpoint = eventValue
+                                             rpm=rpm, flow=flow,
+                                             pressure='{}/{}'.format(pressure[0], pressure[1]))
+
+                        write_log_to_csv(split_time=eventValue,
+                                         flow=flow, rpm=rpm, pressure_1=str(pressure[0]),
+                                         pressure_2=str(pressure[1]), is_manual_measure=True)
 
                 if checkpoint is not None:
-                    logging.info ("Split time measured on checkpoint {}".format(checkpoint))
+                    logging.info("Split time measured on checkpoint {}".format(checkpoint))
 
         except queue.Empty:
             pass
@@ -258,6 +299,9 @@ class StopWatch(object):
 
         # To control the order of inputs we'll track them here
         self._first_split_time_measured = False
+
+        # FIXME: All buttons except the first one cause 'when_pressed' to be triggered right after init.
+        # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
 
         start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
         start_button.when_pressed = lambda: self._start_watch()
@@ -325,7 +369,10 @@ class StopWatch(object):
                                         self.CHECKPOINT: checkpoint})
 
     def _run_manual_measurement(self):
-        self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
+        # Due to the issue above, we'll allow manual measurements only during
+        # and after automatic measurements completed.
+        if self.is_running or len(self._times) > 0:
+            self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
 
     @staticmethod
     def _format_time(timedelta):
@@ -395,7 +442,7 @@ class PressureTransducer(object):
         # Measure
         # value = adc
         # return value
-        return "15/80"
+        return 15, 80
 
 
 class RpmMeter(object):
