@@ -4,13 +4,17 @@ import time
 import queue
 import tkinter as tk
 import csv
+import json
 from tkinter import ttk
 from PIL import ImageTk
 from gpiozero import Button
 from pathlib import Path
 from datetime import datetime as dtime
 
-CSV_FILE_PATH = '/home/vzahradnik/Dokumenty/stopwatch_log.csv'
+# Default file path if not specified in config file
+CSV_FILE_PATH = 'stopwatch_log.csv'
+CONFIG_PATH = 'config.json'
+RPM_K_DEFAULT_VALUE = 1 # It should be in range 1..4
 
 
 class MainApp(object):
@@ -19,6 +23,7 @@ class MainApp(object):
 
     def __init__(self, parent):
         logging.basicConfig(level=logging.INFO)
+        self._load_config()
 
         self._parent = parent
         self._parent.title('Firefighter Stopwatch')
@@ -156,6 +161,15 @@ class MainApp(object):
     def post_on_ui_thread(self, value):
         self._thread_queue.put(value)
 
+    def _load_config(self, path=CONFIG_PATH):
+        """
+        Load configuration from local JSON file. For all mandatory parameters
+        there are defaults on top of this file.
+        """
+        self._configuration = None
+        with open(path, 'r') as f:
+            self._configuration = json.loads(f.read())
+
     def _update_ui(self):
         """ Refresh UI """
 
@@ -206,11 +220,18 @@ class MainApp(object):
             data = [dtime.now().isoformat(), checkpoint, split_time, flow, rpm, pressure_1, pressure_2,
                     'A' if not is_manual_measure else 'M']
 
-            csv_file = Path(CSV_FILE_PATH)
+            csv_file = None
+
+            if self._configuration is not None:
+                try:
+                    csv_file = Path(self._configuration['logovani']['umisteni'])
+                except KeyError or AttributeError:
+                    csv_file = Path(CSV_FILE_PATH)
+
             if not csv_file.exists():
                 write_header = True
 
-            with open(CSV_FILE_PATH, 'a', newline='') as f:
+            with open(csv_file, 'a', newline='') as f:
                 writer = csv.writer(f)
 
                 if write_header:
