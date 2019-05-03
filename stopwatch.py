@@ -15,7 +15,7 @@ from collections import deque
 # Default file path if not specified in config file
 CSV_FILE_PATH = 'stopwatch_log.csv'
 CONFIG_PATH = 'config.json'
-RPM_K_DEFAULT_VALUE = 1 # It should be in range 1..4
+RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
 
 
 class MainApp(object):
@@ -362,11 +362,11 @@ class StopWatch(object):
             self._measure_split_time(checkpoint=3)
             self._first_split_time_measured = True
 
-    def _stop_watch(self, buttonId):
+    def _stop_watch(self, button_id):
         if self._first_split_time_measured and self.is_running:
-            if buttonId == self._buttons['stop_button_1']:
+            if button_id == self._buttons['stop_button_1']:
                 self._measure_split_time(checkpoint=2)
-            elif buttonId == self._buttons['stop_button_2']:
+            elif button_id == self._buttons['stop_button_2']:
                 self._measure_split_time(checkpoint=1)
 
             # This method will be triggered by two sensors.
@@ -419,23 +419,29 @@ class StopWatch(object):
 
 
 class FlowMeter(object):
-    FLOW_METER_COUNT = 1
+    _FLOW_SENSOR_PIN = 16
+    _MAX_QUEUE_LENGTH = 10
 
     def __init__(self, parent: MainApp):
         self._parent = parent
+        self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
+
+        # if parent.configuration is not None:
+        #     try:
+        #         self._k_multiplier = parent.configuration['otacky']['k']
+        #     except KeyError or AttributeError:
+        #         self._k_multiplier = RPM_K_DEFAULT_VALUE
+
+        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True)
+        self._flow_sensor.when_pressed = lambda: self._update_flow()
+
+    def _update_flow(self):
+        self._samples.append(time.time())
 
     # FIXME: Implement
     def get_current_flow(self):
         # Flow meter has pulse output –> flow is defined by number of pulses in a given time
         return 1032
-
-    # TODO: Implement
-    def get_average_flow(self):
-        return 2198
-
-    # TODO: Implement
-    def reset_average_flow(self):
-        pass
 
 
 class PressureTransducer(object):
@@ -448,7 +454,6 @@ class PressureTransducer(object):
     PRESSURE_TRANSDUCER_COUNT = 2
     FREQ_SAMPLE = 1000
 
-    # FIXME: Implement
     def __init__(self, parent: MainApp):
         self._parent = parent
 
@@ -468,8 +473,20 @@ class PressureTransducer(object):
 
 
 class RpmMeter(object):
+    """
+    Calculate engine rev speed (RPM).
 
-    # GPIO input pins
+    To get the value we evaluate pulses coming from the engine.
+
+    We are not interested in the pulse value, it's always 1. However we need to store the time,
+    when the pulse was triggered. From the time difference between first and last value in a circular buffer,
+    we can calculate the RPM.
+
+    f = 1 / T, where T is time period of one pulse. We average the value by computing the period of N samples
+    and divide by N to get the value for 1 sample.
+
+    """
+
     _RPM_SENSOR_PIN = 20
     _MAX_QUEUE_LENGTH = 10
 
@@ -487,11 +504,6 @@ class RpmMeter(object):
         self._rpm_sensor.when_pressed = lambda: self._update_rpm()
 
     def _update_rpm(self):
-        """
-        We are not interested about the value of a sensor, it's always 1. However we need to store the time,
-        when the impulse was triggered. From the time difference between first and last value in a circular buffer,
-        we can calculate RPM.
-        """
         self._samples.append(time.time())
 
     def get_current_rpm(self):
