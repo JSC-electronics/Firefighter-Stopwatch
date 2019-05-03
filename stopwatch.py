@@ -10,6 +10,7 @@ from PIL import ImageTk
 from gpiozero import Button
 from pathlib import Path
 from datetime import datetime as dtime
+from collections import deque
 
 # Default file path if not specified in config file
 CSV_FILE_PATH = 'stopwatch_log.csv'
@@ -166,9 +167,9 @@ class MainApp(object):
         Load configuration from local JSON file. For all mandatory parameters
         there are defaults on top of this file.
         """
-        self._configuration = None
+        self.configuration = None
         with open(path, 'r') as f:
-            self._configuration = json.loads(f.read())
+            self.configuration = json.loads(f.read())
 
     def _update_ui(self):
         """ Refresh UI """
@@ -222,9 +223,9 @@ class MainApp(object):
 
             csv_file = None
 
-            if self._configuration is not None:
+            if self.configuration is not None:
                 try:
-                    csv_file = Path(self._configuration['logovani']['umisteni'])
+                    csv_file = Path(self.configuration['logovani']['umisteni'])
                 except KeyError or AttributeError:
                     csv_file = Path(CSV_FILE_PATH)
 
@@ -468,12 +469,39 @@ class PressureTransducer(object):
 
 class RpmMeter(object):
 
+    # GPIO input pins
+    _RPM_SENSOR_PIN = 20
+    _MAX_QUEUE_LENGTH = 10
+
     def __init__(self, parent: MainApp):
         self._parent = parent
+        self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
 
-    # FIXME: Implement
+        if parent.configuration is not None:
+            try:
+                self._k_multiplier = parent.configuration['otacky']['k']
+            except KeyError or AttributeError:
+                self._k_multiplier = RPM_K_DEFAULT_VALUE
+
+        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
+        self._rpm_sensor.when_pressed = lambda: self._update_rpm()
+
+    def _update_rpm(self):
+        """
+        We are not interested about the value of a sensor, it's always 1. However we need to store the time,
+        when the impulse was triggered. From the time difference between first and last value in a circular buffer,
+        we can calculate RPM.
+        """
+        self._samples.append(time.time())
+
     def get_current_rpm(self):
-        return 3152
+        # The engine wasn't started or was just started.
+        # Don't bother computing the RPM.
+        if len(self._samples) < self._MAX_QUEUE_LENGTH:
+            return 0
+        else:
+            freq = 1 / ((self._samples[-1] - self._samples[0]) / 10) / self._k_multiplier
+            return int(freq * 60)  # RPM
 
 
 if __name__ == "__main__":
