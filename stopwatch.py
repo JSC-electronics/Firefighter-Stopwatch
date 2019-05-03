@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 import time
 import queue
 import tkinter as tk
@@ -12,6 +13,8 @@ class MainApp(object):
     MEASURE_ORDER_PADDING = (50, 0)
 
     def __init__(self, parent):
+        logging.basicConfig(level=logging.INFO)
+
         self._parent = parent
         self._parent.title('Firefighter Stopwatch')
         self._parent.columnconfigure(0, weight=1)
@@ -196,10 +199,19 @@ class MainApp(object):
                     clear_measurement_data()
             # Events with data as dicts (key = value)
             elif type(event) == dict:
-                for eventType, eventValue in event.items():
-                    if eventType == StopWatch.SPLIT_TIME_MEASURED:
+                checkpoint = None
+
+                for eventKey, eventValue in event.items():
+                    if eventKey == StopWatch.SPLIT_TIME_MEASURED:
                         set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue)
                         self._auto_measurement_rows_populated += 1
+                    elif eventKey == StopWatch.MANUAL_MEASURE_STARTED:
+                        set_measurement_data(is_manual_measure=True, split_time=eventValue)
+                    elif eventKey == StopWatch.CHECKPOINT:
+                        checkpoint = eventValue
+
+                if checkpoint is not None:
+                    logging.info ("Split time measured on checkpoint {}".format(checkpoint))
 
         except queue.Empty:
             pass
@@ -213,6 +225,8 @@ class StopWatch(object):
     STOPWATCH_STOPPED = 'stopwatch_stopped'
     STOPWATCH_RESET = 'stopwatch_reset'
     SPLIT_TIME_MEASURED = 'split_time_measured'
+    MANUAL_MEASURE_STARTED = 'manual_measure_started'
+    CHECKPOINT = 'checkpoint'
 
     # GPIO input pins
     _STOPWATCH_TRIGGER_PIN = 26
@@ -221,7 +235,8 @@ class StopWatch(object):
     # Whichever pin is triggered last will stop the watch.
     # Each triggering will record data at a given moment.
     _STOPWATCH_STOP_TRIGGER_PINS = [13, 6]
-    _STOPWATCH_RESET_PIN = 5
+    _STOPWATCH_RESET_PIN = 21
+    _MANUAL_MEASURE_PIN = 5
 
     def __init__(self, parent: MainApp):
         # Store time points from which we'll calculate delta values
@@ -230,55 +245,76 @@ class StopWatch(object):
         self._should_stop_clock = False
         self._parent = parent
 
+        # To control the order of inputs we'll track them here
+        self._first_split_time_measured = False
+
         start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
         start_button.when_pressed = lambda: self._start_watch()
 
         split_time_button = Button(self._STOPWATCH_SPLIT_TIME_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
-        split_time_button.when_pressed = lambda: self._measure_split_time()
+        split_time_button.when_pressed = lambda: self._measure_first_split_time()
 
         stop_button_1 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[0], pull_up=True, bounce_time=0.1)
-        stop_button_1.when_pressed = lambda: self._stop_watch()
+        stop_button_1.when_pressed = lambda button: self._stop_watch(button)
 
         stop_button_2 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[1], pull_up=True, bounce_time=0.1)
-        stop_button_2.when_pressed = lambda: self._stop_watch()
+        stop_button_2.when_pressed = lambda button: self._stop_watch(button)
+
+        manual_measure_button = Button(self._MANUAL_MEASURE_PIN, pull_up=True, bounce_time=0.1)
+        manual_measure_button.when_pressed = lambda: self._run_manual_measurement()
 
         reset_button = Button(self._STOPWATCH_RESET_PIN, pull_up=True, bounce_time=0.1)
         reset_button.when_pressed = lambda: self._reset_watch()
 
         self._buttons = {'start_button': start_button, 'split_time_button': split_time_button,
                          'stop_button_1': stop_button_1, 'stop_button_2': stop_button_2,
-                         'reset_button': reset_button}
+                         'manual_measure_button': manual_measure_button, 'reset_button': reset_button}
 
     @property
     def is_running(self):
         return self._is_running
 
     def _start_watch(self):
-        self._is_running = True
-        self._parent.post_on_ui_thread(self.STOPWATCH_STARTED)
-        self._measure_split_time()
+        if not self.is_running:
+            self._measure_split_time(checkpoint=4)
+            self._is_running = True
+            self._parent.post_on_ui_thread(self.STOPWATCH_STARTED)
 
-    def _stop_watch(self):
-        self._measure_split_time()
+    def _measure_first_split_time(self):
+        if self.is_running:
+            self._measure_split_time(checkpoint=3)
+            self._first_split_time_measured = True
 
-        # This method will be triggered by two sensors.
-        # The one which triggers last will stop the clock.
-        if self._should_stop_clock:
-            self._is_running = False
-            self._parent.post_on_ui_thread(self.STOPWATCH_STOPPED)
-        else:
-            self._should_stop_clock = True
+    def _stop_watch(self, buttonId):
+        if self._first_split_time_measured and self.is_running:
+            if buttonId == self._buttons['stop_button_1']:
+                self._measure_split_time(checkpoint=2)
+            elif buttonId == self._buttons['stop_button_2']:
+                self._measure_split_time(checkpoint=1)
+
+            # This method will be triggered by two sensors.
+            # The one which triggers last will stop the clock.
+            if self._should_stop_clock:
+                self._is_running = False
+                self._parent.post_on_ui_thread(self.STOPWATCH_STOPPED)
+            else:
+                self._should_stop_clock = True
 
     def _reset_watch(self):
         self._is_running = False
         self._should_stop_clock = False
+        self._first_split_time_measured = False
         self._times = []
         self._parent.post_on_ui_thread(self.STOPWATCH_RESET)
 
-    def _measure_split_time(self):
+    def _measure_split_time(self, checkpoint: int):
         split_time = time.time()
         self._times.append(split_time)
-        self._parent.post_on_ui_thread({self.SPLIT_TIME_MEASURED: self._format_time(split_time - self._times[0])})
+        self._parent.post_on_ui_thread({self.SPLIT_TIME_MEASURED: self._format_time(split_time - self._times[0]),
+                                        self.CHECKPOINT: checkpoint})
+
+    def _run_manual_measurement(self):
+        self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
 
     @staticmethod
     def _format_time(timedelta):
