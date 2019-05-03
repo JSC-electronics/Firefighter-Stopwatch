@@ -140,6 +140,9 @@ class MainApp(object):
         self._parent.after(self.SCREEN_REFRESH_MS, self._update_ui)
 
         self._stopwatch = StopWatch(self)
+        self._rpmmeter = RpmMeter(self)
+        self._flowmeter = FlowMeter(self)
+        self._pressure = PressureTransducer(self)
 
     # noinspection PyUnusedLocal
     def close(self, *args):
@@ -203,10 +206,18 @@ class MainApp(object):
 
                 for eventKey, eventValue in event.items():
                     if eventKey == StopWatch.SPLIT_TIME_MEASURED:
-                        set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue)
+                        set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue,
+                                             rpm=str(self._rpmmeter.get_current_rpm()),
+                                             flow='{}/{}'.format(self._flowmeter.get_current_flow(),
+                                                                 self._flowmeter.get_average_flow()),
+                                             pressure=self._pressure.get_current_pressure())
                         self._auto_measurement_rows_populated += 1
                     elif eventKey == StopWatch.MANUAL_MEASURE_STARTED:
-                        set_measurement_data(is_manual_measure=True, split_time=eventValue)
+                        set_measurement_data(is_manual_measure=True, split_time=eventValue,
+                                             rpm=str(self._rpmmeter.get_current_rpm()),
+                                             flow='{}/{}'.format(self._flowmeter.get_current_flow(),
+                                                                 self._flowmeter.get_average_flow()),
+                                             pressure=self._pressure.get_current_pressure())
                     elif eventKey == StopWatch.CHECKPOINT:
                         checkpoint = eventValue
 
@@ -341,6 +352,9 @@ class StopWatch(object):
 class FlowMeter(object):
     FLOW_METER_COUNT = 1
 
+    def __init__(self, parent: MainApp):
+        self._parent = parent
+
     # FIXME: Implement
     def get_current_flow(self):
         # Flow meter has pulse output –> flow is defined by number of pulses in a given time
@@ -366,7 +380,9 @@ class PressureTransducer(object):
     FREQ_SAMPLE = 1000
 
     # FIXME: Implement
-    def __init__(self):
+    def __init__(self, parent: MainApp):
+        self._parent = parent
+
         # Init I2C bus
         # i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -384,6 +400,9 @@ class PressureTransducer(object):
 
 class RpmMeter(object):
 
+    def __init__(self, parent: MainApp):
+        self._parent = parent
+
     # FIXME: Implement
     def get_current_rpm(self):
         return 3152
@@ -392,5 +411,4 @@ class RpmMeter(object):
 if __name__ == "__main__":
     root = tk.Tk()
     app = MainApp(root)
-    # app._set_measurement_data(time='00:00.000', rpm='3152', flow='1032/2198', pressure='15/80')
     root.mainloop()
