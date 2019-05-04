@@ -391,10 +391,7 @@ class StopWatch(object):
                                         self.CHECKPOINT: checkpoint})
 
     def _run_manual_measurement(self):
-        # Due to the issue above, we'll allow manual measurements only during
-        # and after automatic measurements completed.
-        if self.is_running or len(self._times) > 0:
-            self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
+        self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
 
     @staticmethod
     def _format_time(timedelta):
@@ -432,7 +429,7 @@ class FlowMeter(object):
         #     except KeyError or AttributeError:
         #         self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True)
+        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
         self._flow_sensor.when_pressed = lambda: self._update_flow()
 
     def _update_flow(self):
@@ -500,7 +497,7 @@ class RpmMeter(object):
             except KeyError or AttributeError:
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
+        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True, bounce_time=0.0001)
         self._rpm_sensor.when_pressed = lambda: self._update_rpm()
 
     def _update_rpm(self):
