@@ -20,6 +20,8 @@ from collections import deque
 CSV_FILE_PATH = 'stopwatch_log.csv'
 CONFIG_PATH = 'config.json'
 RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
+FLOW_K_DEFAULT_VALUE = 8.34
+FLOW_Q_DEFAULT_VALUE = 0.229
 
 
 class MainApp(object):
@@ -427,11 +429,14 @@ class FlowMeter(object):
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
 
-        # if parent.configuration is not None:
-        #     try:
-        #         self._k_multiplier = parent.configuration['otacky']['k']
-        #     except KeyError or AttributeError:
-        #         self._k_multiplier = RPM_K_DEFAULT_VALUE
+        if parent.configuration is not None:
+            try:
+                self._k = parent.configuration['prutok']['k']
+                self._q = parent.configuration['prutok']['q']
+            except KeyError or AttributeError:
+                logging.warning("Flow variables are not properly defined in a config!")
+                self._k = FLOW_K_DEFAULT_VALUE
+                self._q = FLOW_Q_DEFAULT_VALUE
 
         self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
         self._flow_sensor.when_pressed = lambda: self._update_flow()
@@ -440,15 +445,14 @@ class FlowMeter(object):
         self._samples.append(time.time())
 
     def get_current_flow(self):
-        k = 8.34
-        q = 0.229
         # Don't bother computing flow if water pump is not running.
         if len(self._samples) < self._MAX_QUEUE_LENGTH:
             lpm = 0
         else:
             f = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH)
-            lpm = k*(f+q)
-        return lpm
+            lpm = self._k * (f + self._q)
+
+        return int(lpm)
 
 
 class PressureTransducer(object):
@@ -505,6 +509,7 @@ class RpmMeter(object):
             try:
                 self._k_multiplier = parent.configuration['otacky']['k']
             except KeyError or AttributeError:
+                logging.warning("RPM variables are not properly defined in a config!")
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
         self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True, bounce_time=0.0001)
