@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 import time
+import threading
 import queue
 import tkinter as tk
 import csv
@@ -332,6 +333,7 @@ class StopWatch(object):
 
         # FIXME: All buttons except the first one cause 'when_pressed' to be triggered right after init.
         # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
+        # Apparently this bug does occur only on a PC, not RPi.
 
         start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
         start_button.when_pressed = lambda: self._start_watch()
@@ -472,6 +474,12 @@ class PressureTransducer(object):
         self.avg_samples_no = self._SAMPLES_FOR_SLIDING_AVG if avg_samples_no is None \
             else avg_samples_no
 
+        def runnable():
+            while True:
+                # TODO: Replace with actual code and adjust sleep time (in seconds)
+                print('Doing stuff')
+                time.sleep(0.01)
+
         try:
             # Init I2C bus
             self._i2c = busio.I2C(board.SCL, board.SDA)
@@ -497,6 +505,11 @@ class PressureTransducer(object):
             self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
 
             self._flag_update_lock = 0
+
+            # Init thread to poll for data
+            self._worker = threading.Thread(target=runnable)
+            self._worker.daemon = True
+            self._worker.start()
 
         except ValueError:
             self._i2c_initialized = False
