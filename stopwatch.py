@@ -5,6 +5,10 @@ import queue
 import tkinter as tk
 import csv
 import json
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
 from PIL import ImageTk
 from gpiozero import Button
@@ -391,10 +395,7 @@ class StopWatch(object):
                                         self.CHECKPOINT: checkpoint})
 
     def _run_manual_measurement(self):
-        # Due to the issue above, we'll allow manual measurements only during
-        # and after automatic measurements completed.
-        if self.is_running or len(self._times) > 0:
-            self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
+        self._parent.post_on_ui_thread({self.MANUAL_MEASURE_STARTED: self.get_current_time()})
 
     @staticmethod
     def _format_time(timedelta):
@@ -432,7 +433,7 @@ class FlowMeter(object):
         #     except KeyError or AttributeError:
         #         self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True)
+        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
         self._flow_sensor.when_pressed = lambda: self._update_flow()
 
     def _update_flow(self):
@@ -457,25 +458,25 @@ class PressureTransducer(object):
     # - pressure range:     0–100 bar
     # - voltage output:     0–10 V DC
 
-    PRESSURE_TRANSDUCER_COUNT = 2
-    FREQ_SAMPLE = 1000
-
     def __init__(self, parent: MainApp):
         self._parent = parent
 
         # Init I2C bus
-        # i2c = busio.I2C(board.SCL, board.SDA)
+        self._i2c = busio.I2C(board.SCL, board.SDA)
 
         # Create instance of AD converter module
-        # adc = ADS.ADS1115(i2c)
-        pass
+        self._adc = ADS.ADS1115(self._i2c)
 
-    # FIXME: Implement
+        # Channels to read values from
+        self._adc_channels = [AnalogIn(self._adc, ADS.P0), AnalogIn(self._adc, ADS.P1)]
+
     def get_current_pressure(self):
-        # Measure
-        # value = adc
-        # return value
-        return 15, 80
+        def calculate_pressure_from_input_value(value):
+            # TODO: Replace with proper equation; drop decimal part
+            return int(value)
+
+        return tuple(map(calculate_pressure_from_input_value,
+                         [self._adc_channels[0].value, self._adc_channels[1].value]))
 
 
 class RpmMeter(object):
@@ -506,7 +507,7 @@ class RpmMeter(object):
             except KeyError or AttributeError:
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
+        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True, bounce_time=0.0001)
         self._rpm_sensor.when_pressed = lambda: self._update_rpm()
 
     def _update_rpm(self):
