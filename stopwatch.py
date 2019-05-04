@@ -421,7 +421,7 @@ class StopWatch(object):
 
 class FlowMeter(object):
     _FLOW_SENSOR_PIN = 16
-    _MAX_QUEUE_LENGTH = 10
+    _MAX_QUEUE_LENGTH = 5
 
     def __init__(self, parent: MainApp):
         self._parent = parent
@@ -439,10 +439,16 @@ class FlowMeter(object):
     def _update_flow(self):
         self._samples.append(time.time())
 
-    # FIXME: Implement
     def get_current_flow(self):
-        # Flow meter has pulse output –> flow is defined by number of pulses in a given time
-        return 1032
+        k = 8.34
+        q = 0.229
+        # Don't bother computing flow if water pump is not running.
+        if len(self._samples) < self._MAX_QUEUE_LENGTH:
+            lpm = 0
+        else:
+            f = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH)
+            lpm = k*(f+q)
+        return lpm
 
 
 class PressureTransducer(object):
@@ -513,7 +519,7 @@ class RpmMeter(object):
         if len(self._samples) < self._MAX_QUEUE_LENGTH:
             return 0
         else:
-            freq = 1 / ((self._samples[-1] - self._samples[0]) / 10) / self._k_multiplier
+            freq = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH) / self._k_multiplier
             return int(freq * 60)  # RPM
 
 
