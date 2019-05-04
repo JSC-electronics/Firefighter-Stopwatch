@@ -231,11 +231,11 @@ class MainApp(object):
 
             if self.configuration is not None:
                 try:
-                    csv_file = Path(self.configuration['logovani']['umisteni'])
+                    csv_file = self.configuration['logovani']['umisteni']
                 except KeyError or AttributeError:
-                    csv_file = Path(CSV_FILE_PATH)
+                    csv_file = CSV_FILE_PATH
 
-            if not csv_file.exists():
+            if not Path(csv_file).exists():
                 write_header = True
 
             with open(csv_file, 'a', newline='') as f:
@@ -464,23 +464,31 @@ class PressureTransducer(object):
 
     def __init__(self, parent: MainApp):
         self._parent = parent
+        self._i2c_initialized = False
 
-        # Init I2C bus
-        self._i2c = busio.I2C(board.SCL, board.SDA)
+        try:
+            # Init I2C bus
+            self._i2c = busio.I2C(board.SCL, board.SDA)
 
-        # Create instance of AD converter module
-        self._adc = ads.ADS1115(self._i2c)
+            # Create instance of AD converter module
+            self._adc = ads.ADS1115(self._i2c)
 
-        # Channels to read values from
-        self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
+            # Channels to read values from
+            self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
+            self._i2c_initialized = True
+
+        except ValueError:
+            self._i2c_initialized = False
 
     def get_current_pressure(self):
         def calculate_pressure_from_input_value(value):
             # TODO: Replace with proper equation; drop decimal part
             return int(value)
 
-        return tuple(map(calculate_pressure_from_input_value,
-                         [self._adc_channels[0].value, self._adc_channels[1].value]))
+        return 0,0 if not self._i2c_initialized else tuple(
+            map(calculate_pressure_from_input_value,
+                [self._adc_channels[0].value, self._adc_channels[1].value])
+        )
 
 
 class RpmMeter(object):
@@ -512,7 +520,7 @@ class RpmMeter(object):
                 logging.warning("RPM variables are not properly defined in a config!")
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True, bounce_time=0.0001)
+        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
         self._rpm_sensor.when_pressed = lambda: self._update_rpm()
 
     def _update_rpm(self):
