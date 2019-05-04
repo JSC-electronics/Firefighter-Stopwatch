@@ -9,6 +9,8 @@ import json
 import board
 import busio
 import adafruit_ads1x15.ads1115 as ads
+import numpy
+from adafruit_ads1x15.ads1x15 import Mode
 from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
 from PIL import ImageTk
@@ -264,7 +266,7 @@ class MainApp(object):
                     if eventKey == StopWatch.SPLIT_TIME_MEASURED:
                         checkpoint = event.get(StopWatch.CHECKPOINT)
                         flow = str(self._flowmeter.get_current_flow())
-                        pressure = self._pressure.get_current_pressure()
+                        pressure = self._pressure.get_sliding_avg_pressure()
                         rpm = str(self._rpmmeter.get_current_rpm())
 
                         set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue,
@@ -280,7 +282,7 @@ class MainApp(object):
                     elif eventKey == StopWatch.MANUAL_MEASURE_STARTED:
                         checkpoint = event.get(StopWatch.CHECKPOINT)
                         flow = str(self._flowmeter.get_current_flow())
-                        pressure = self._pressure.get_current_pressure()
+                        pressure = self._pressure.get_sliding_avg_pressure()
                         rpm = str(self._rpmmeter.get_current_rpm())
 
                         set_measurement_data(is_manual_measure=True, split_time=eventValue,
@@ -464,15 +466,19 @@ class PressureTransducer(object):
     # - pressure range:     0–100 bar
     # - voltage output:     0–10 V DC
 
-    def __init__(self, parent: MainApp):
+    _SAMPLES_FOR_SLIDING_AVG = 25
+
+    def __init__(self, parent: MainApp, avg_samples_no=None):
         self._parent = parent
         self._i2c_initialized = False
+        self.avg_samples_no = self._SAMPLES_FOR_SLIDING_AVG if avg_samples_no is None \
+            else avg_samples_no
 
         def runnable():
             while True:
-                # TODO: Replace with actual code and adjust sleep time (in seconds)
-                print('Doing stuff')
-                time.sleep(0.01)
+                if not self._is_measuring:
+                    self._update_sliding_avg_pressure_thread()
+                time.sleep(1/avg_samples_no)
 
         try:
             # Init I2C bus
@@ -480,10 +486,25 @@ class PressureTransducer(object):
 
             # Create instance of AD converter module
             self._adc = ads.ADS1115(self._i2c)
+            self._i2c_initialized = True
+
+            # Set gain to measure in range +/-6.144V
+            self._adc.gain(2 / 3)
+
+            # Set data rate
+            self._adc.data_rate(128)
+
+            # Set continuous mode
+            self._adc.mode(Mode.SINGLE)
 
             # Channels to read values from
             self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
-            self._i2c_initialized = True
+
+            # Lists of voltages to compute sliding average from
+            self._voltage_1_samples = deque(maxlen=self.avg_samples_no)
+            self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
+
+            self._is_measuring = False
 
             # Init thread to poll for data
             self._worker = threading.Thread(target=runnable)
@@ -493,15 +514,36 @@ class PressureTransducer(object):
         except ValueError:
             self._i2c_initialized = False
 
-    def get_current_pressure(self):
-        def calculate_pressure_from_input_value(value):
-            # TODO: Replace with proper equation; drop decimal part
-            return int(value)
+    def _update_sliding_avg_pressure_thread(self):
+        self._is_measuring = True
+        self._voltage_1_samples.append(self._adc_channels[0].voltage)
+        self._voltage_2_samples.append(self._adc_channels[1].voltage)
+        self._is_measuring = False
 
-        return 0,0 if not self._i2c_initialized else tuple(
-            map(calculate_pressure_from_input_value,
+    def get_current_pressure(self):
+        return 0, 0 if not self._i2c_initialized else tuple(
+            map(self._calculate_pressure_from_input_value,
                 [self._adc_channels[0].value, self._adc_channels[1].value])
         )
+
+    # noinspection PyTypeChecker
+    @staticmethod
+    def _calculate_pressure_from_input_value(voltage):
+        # There is voltage divider on the input, so:
+        # 5 V DC = 100 bar (full scale)
+        # 1 V DC = 20 bar
+        # 1 bar = 0.05 V DC
+        pressure = voltage * 20
+        return int(pressure)
+
+    def get_sliding_avg_pressure(self):
+        # Sliding average is computed from _MAX_QUEUE_LENGTH samples
+        avg_p1 = numpy.cumsum(self._voltage_1_samples)
+        avg_p2 = numpy.cumsum(self._voltage_2_samples)
+        avg_p1 /= self.avg_samples_no
+        avg_p2 /= self.avg_samples_no
+        return 0, 0 if not self._i2c_initialized else tuple(
+            map(self._calculate_pressure_from_input_value, avg_p1, avg_p2))
 
 
 class RpmMeter(object):
