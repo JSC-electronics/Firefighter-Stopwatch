@@ -19,8 +19,8 @@ RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
 
 
 class MainApp(object):
-    SCREEN_REFRESH_MS = 40
-    MEASURE_ORDER_PADDING = (50, 0)
+    _SCREEN_REFRESH_MS = 40
+    _MEASURE_ORDER_PADDING = (50, 0)
 
     def __init__(self, parent):
         logging.basicConfig(level=logging.INFO)
@@ -87,7 +87,7 @@ class MainApp(object):
 
         for row in range(4):
             label = ttk.Label(content_frame, style='Customized.Main.TLabel',
-                              padding=self.MEASURE_ORDER_PADDING)
+                              padding=self._MEASURE_ORDER_PADDING)
             label.grid(column=0, row=initial_row + row)
             label['text'] = str(row + 1)
 
@@ -122,7 +122,7 @@ class MainApp(object):
         self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': []}
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel',
-                          padding=self.MEASURE_ORDER_PADDING)
+                          padding=self._MEASURE_ORDER_PADDING)
         label.grid(column=0, row=8)
         label['text'] = 'M'
 
@@ -148,7 +148,7 @@ class MainApp(object):
 
         # Queue for UI thread to update components
         self._thread_queue = queue.Queue()
-        self._parent.after(self.SCREEN_REFRESH_MS, self._update_ui)
+        self._parent.after(self._SCREEN_REFRESH_MS, self._update_ui)
 
         self._stopwatch = StopWatch(self)
         self._rpmmeter = RpmMeter(self)
@@ -290,7 +290,7 @@ class MainApp(object):
         except queue.Empty:
             pass
 
-        self._parent.after(self.SCREEN_REFRESH_MS, self._update_ui)
+        self._parent.after(self._SCREEN_REFRESH_MS, self._update_ui)
 
 
 class StopWatch(object):

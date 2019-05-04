@@ -1,3 +1,5 @@
 gpiozero
 pigpio
 Pillow
+#smbus2
+Adafruit-Blinka
