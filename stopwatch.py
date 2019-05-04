@@ -476,9 +476,9 @@ class PressureTransducer(object):
 
         def runnable():
             while True:
-                # TODO: Replace with actual code and adjust sleep time (in seconds)
-                print('Doing stuff')
-                time.sleep(0.01)
+                if not self._is_measuring:
+                    self._update_sliding_avg_pressure_thread()
+                time.sleep(1/avg_samples_no)
 
         try:
             # Init I2C bus
@@ -504,7 +504,7 @@ class PressureTransducer(object):
             self._voltage_1_samples = deque(maxlen=self.avg_samples_no)
             self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
 
-            self._flag_update_lock = 0
+            self._is_measuring = False
 
             # Init thread to poll for data
             self._worker = threading.Thread(target=runnable)
@@ -515,16 +515,17 @@ class PressureTransducer(object):
             self._i2c_initialized = False
 
     def _update_sliding_avg_pressure_thread(self):
-        # FIXME: Do not call this function, if previous update/call was not finished
-        # self._flag_update_lock = 1
+        self._is_measuring = True
         self._voltage_1_samples.append(self._adc_channels[0].voltage)
         self._voltage_2_samples.append(self._adc_channels[1].voltage)
+        self._is_measuring = False
 
     def get_current_pressure(self):
         return tuple(map(self._calculate_pressure_from_input_value,
                          [self._adc_channels[0].voltage, self._adc_channels[1].voltage]))
 
     # noinspection PyTypeChecker
+    @staticmethod
     def _calculate_pressure_from_input_value(voltage):
         # There is voltage divider on the input, so:
         # 5 V DC = 100 bar (full scale)
