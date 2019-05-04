@@ -1,5 +1,5 @@
 gpiozero
 pigpio
 Pillow
-#smbus2
 Adafruit-Blinka
+adafruit-circuitpython-ads1x15

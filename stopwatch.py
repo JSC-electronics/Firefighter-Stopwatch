@@ -5,6 +5,10 @@ import queue
 import tkinter as tk
 import csv
 import json
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
 from PIL import ImageTk
 from gpiozero import Button
@@ -448,25 +452,25 @@ class PressureTransducer(object):
     # - pressure range:     0–100 bar
     # - voltage output:     0–10 V DC
 
-    PRESSURE_TRANSDUCER_COUNT = 2
-    FREQ_SAMPLE = 1000
-
     def __init__(self, parent: MainApp):
         self._parent = parent
 
         # Init I2C bus
-        # i2c = busio.I2C(board.SCL, board.SDA)
+        self._i2c = busio.I2C(board.SCL, board.SDA)
 
         # Create instance of AD converter module
-        # adc = ADS.ADS1115(i2c)
-        pass
+        self._adc = ADS.ADS1115(self._i2c)
 
-    # FIXME: Implement
+        # Channels to read values from
+        self._adc_channels = [AnalogIn(self._adc, ADS.P0), AnalogIn(self._adc, ADS.P1)]
+
     def get_current_pressure(self):
-        # Measure
-        # value = adc
-        # return value
-        return 15, 80
+        def calculate_pressure_from_input_value(value):
+            # TODO: Replace with proper equation; drop decimal part
+            return int(value)
+
+        return tuple(map(calculate_pressure_from_input_value,
+                         [self._adc_channels[0].value, self._adc_channels[1].value]))
 
 
 class RpmMeter(object):
