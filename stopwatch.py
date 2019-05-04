@@ -7,7 +7,7 @@ import csv
 import json
 import board
 import busio
-import adafruit_ads1x15.ads1115 as ADS
+import adafruit_ads1x15.ads1115 as ads
 from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
 from PIL import ImageTk
@@ -20,6 +20,8 @@ from collections import deque
 CSV_FILE_PATH = 'stopwatch_log.csv'
 CONFIG_PATH = 'config.json'
 RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
+FLOW_K_DEFAULT_VALUE = 8.34
+FLOW_Q_DEFAULT_VALUE = 0.229
 
 
 class MainApp(object):
@@ -229,11 +231,11 @@ class MainApp(object):
 
             if self.configuration is not None:
                 try:
-                    csv_file = Path(self.configuration['logovani']['umisteni'])
+                    csv_file = self.configuration['logovani']['umisteni']
                 except KeyError or AttributeError:
-                    csv_file = Path(CSV_FILE_PATH)
+                    csv_file = CSV_FILE_PATH
 
-            if not csv_file.exists():
+            if not Path(csv_file).exists():
                 write_header = True
 
             with open(csv_file, 'a', newline='') as f:
@@ -427,11 +429,14 @@ class FlowMeter(object):
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
 
-        # if parent.configuration is not None:
-        #     try:
-        #         self._k_multiplier = parent.configuration['otacky']['k']
-        #     except KeyError or AttributeError:
-        #         self._k_multiplier = RPM_K_DEFAULT_VALUE
+        if parent.configuration is not None:
+            try:
+                self._k = parent.configuration['prutok']['k']
+                self._q = parent.configuration['prutok']['q']
+            except KeyError or AttributeError:
+                logging.warning("Flow variables are not properly defined in a config!")
+                self._k = FLOW_K_DEFAULT_VALUE
+                self._q = FLOW_Q_DEFAULT_VALUE
 
         self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
         self._flow_sensor.when_pressed = lambda: self._update_flow()
@@ -440,15 +445,14 @@ class FlowMeter(object):
         self._samples.append(time.time())
 
     def get_current_flow(self):
-        k = 8.34
-        q = 0.229
         # Don't bother computing flow if water pump is not running.
         if len(self._samples) < self._MAX_QUEUE_LENGTH:
             lpm = 0
         else:
             f = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH)
-            lpm = k*(f+q)
-        return lpm
+            lpm = self._k * (f + self._q)
+
+        return int(lpm)
 
 
 class PressureTransducer(object):
@@ -460,23 +464,31 @@ class PressureTransducer(object):
 
     def __init__(self, parent: MainApp):
         self._parent = parent
+        self._i2c_initialized = False
 
-        # Init I2C bus
-        self._i2c = busio.I2C(board.SCL, board.SDA)
+        try:
+            # Init I2C bus
+            self._i2c = busio.I2C(board.SCL, board.SDA)
 
-        # Create instance of AD converter module
-        self._adc = ADS.ADS1115(self._i2c)
+            # Create instance of AD converter module
+            self._adc = ads.ADS1115(self._i2c)
 
-        # Channels to read values from
-        self._adc_channels = [AnalogIn(self._adc, ADS.P0), AnalogIn(self._adc, ADS.P1)]
+            # Channels to read values from
+            self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
+            self._i2c_initialized = True
+
+        except ValueError:
+            self._i2c_initialized = False
 
     def get_current_pressure(self):
         def calculate_pressure_from_input_value(value):
             # TODO: Replace with proper equation; drop decimal part
             return int(value)
 
-        return tuple(map(calculate_pressure_from_input_value,
-                         [self._adc_channels[0].value, self._adc_channels[1].value]))
+        return 0,0 if not self._i2c_initialized else tuple(
+            map(calculate_pressure_from_input_value,
+                [self._adc_channels[0].value, self._adc_channels[1].value])
+        )
 
 
 class RpmMeter(object):
@@ -505,9 +517,10 @@ class RpmMeter(object):
             try:
                 self._k_multiplier = parent.configuration['otacky']['k']
             except KeyError or AttributeError:
+                logging.warning("RPM variables are not properly defined in a config!")
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True, bounce_time=0.0001)
+        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
         self._rpm_sensor.when_pressed = lambda: self._update_rpm()
 
     def _update_rpm(self):
