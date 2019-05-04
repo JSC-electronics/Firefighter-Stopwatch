@@ -521,8 +521,10 @@ class PressureTransducer(object):
         self._is_measuring = False
 
     def get_current_pressure(self):
-        return tuple(map(self._calculate_pressure_from_input_value,
-                         [self._adc_channels[0].voltage, self._adc_channels[1].voltage]))
+        return 0, 0 if not self._i2c_initialized else tuple(
+            map(self._calculate_pressure_from_input_value,
+                [self._adc_channels[0].value, self._adc_channels[1].value])
+        )
 
     # noinspection PyTypeChecker
     @staticmethod
@@ -536,11 +538,12 @@ class PressureTransducer(object):
 
     def get_sliding_avg_pressure(self):
         # Sliding average is computed from _MAX_QUEUE_LENGTH samples
-        sum_p1 = numpy.cumsum(self._voltage_1_samples)
-        sum_p2 = numpy.cumsum(self._voltage_2_samples)
-        sum_p1 /= self.avg_samples_no
-        sum_p2 /= self.avg_samples_no
-        return tuple(map(self._calculate_pressure_from_input_value, sum_p1, sum_p2))
+        avg_p1 = numpy.cumsum(self._voltage_1_samples)
+        avg_p2 = numpy.cumsum(self._voltage_2_samples)
+        avg_p1 /= self.avg_samples_no
+        avg_p2 /= self.avg_samples_no
+        return 0, 0 if not self._i2c_initialized else tuple(
+            map(self._calculate_pressure_from_input_value, avg_p1, avg_p2))
 
 
 class RpmMeter(object):
