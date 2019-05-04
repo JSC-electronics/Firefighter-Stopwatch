@@ -7,7 +7,7 @@ import csv
 import json
 import board
 import busio
-import adafruit_ads1x15.ads1115 as ADS
+import adafruit_ads1x15.ads1115 as ads
 from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
 from PIL import ImageTk
@@ -469,10 +469,10 @@ class PressureTransducer(object):
         self._i2c = busio.I2C(board.SCL, board.SDA)
 
         # Create instance of AD converter module
-        self._adc = ADS.ADS1115(self._i2c)
+        self._adc = ads.ADS1115(self._i2c)
 
         # Channels to read values from
-        self._adc_channels = [AnalogIn(self._adc, ADS.P0), AnalogIn(self._adc, ADS.P1)]
+        self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
 
     def get_current_pressure(self):
         def calculate_pressure_from_input_value(value):
