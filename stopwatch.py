@@ -124,9 +124,6 @@ class MainApp(object):
             label['text'] = '        '
             self._auto_measurement_labels['pressure'].append(label)
 
-        # Indicate how many rows are populated with data
-        self._auto_measurement_rows_populated = 0
-
         # Manual measurement label
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         label.grid(column=0, row=7, columnspan=5)
@@ -197,7 +194,7 @@ class MainApp(object):
                 self._manual_measurement_labels['flow'][0]['text'] = flow
                 self._manual_measurement_labels['pressure'][0]['text'] = pressure
             else:
-                if row < 0 or row > 3:
+                if row is None or row < 0 or row > 3:
                     # raise ValueError("Automatic measurements have at most 4 rows!")
                     return
 
@@ -212,8 +209,6 @@ class MainApp(object):
             cleared_rpm = '      '
             cleared_flow = '               '
             cleared_pressure = '        '
-
-            self._auto_measurement_rows_populated = 0
 
             for idx in range(4):
                 set_measurement_data(row=idx, split_time=cleared_time, rpm=cleared_rpm,
@@ -256,6 +251,15 @@ class MainApp(object):
             except FileNotFoundError:
                 logging.error("Unable to create log file. Check path in \'config.json\'.")
 
+        def get_row_for_checkpoint(checkpoint: int):
+            # checkpoint -> row mapping
+            mapping = {4: 0,
+                       3: 1,
+                       2: 2,
+                       1: 3}
+
+            return mapping.get(checkpoint)
+
         update_ui_stopwatch_time(self._stopwatch.get_current_time())
 
         try:
@@ -276,10 +280,9 @@ class MainApp(object):
                         pressure = self._pressure.get_sliding_avg_pressure()
                         rpm = str(self._rpmmeter.get_current_rpm())
 
-                        set_measurement_data(row=self._auto_measurement_rows_populated, split_time=eventValue,
+                        set_measurement_data(row=get_row_for_checkpoint(checkpoint), split_time=eventValue,
                                              rpm=rpm, flow=flow,
                                              pressure='{}/{}'.format(pressure[0], pressure[1]))
-                        self._auto_measurement_rows_populated += 1
 
                         if checkpoint:
                             write_log_to_csv(checkpoint=checkpoint, split_time=eventValue,
@@ -324,7 +327,7 @@ class StopWatch(object):
 
     # Whichever pin is triggered last will stop the watch.
     # Each triggering will record data at a given moment.
-    _STOPWATCH_STOP_TRIGGER_PINS = [13, 6]
+    _STOPWATCH_STOP_TRIGGER_PINS = [6, 13]
     _STOPWATCH_RESET_PIN = 21
     _MANUAL_MEASURE_PIN = 5
 
@@ -337,6 +340,8 @@ class StopWatch(object):
 
         # To control the order of inputs we'll track them here
         self._first_split_time_measured = False
+        self._checkpoint_1_measured = False
+        self._checkpoint_2_measured = False
 
         # FIXME: All buttons except the first one cause 'when_pressed' to be triggered right after init.
         # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
@@ -376,15 +381,29 @@ class StopWatch(object):
 
     def _measure_first_split_time(self):
         if self.is_running:
+            if self._first_split_time_measured:
+                logging.warning("Repeated measure on checkpoint 3")
+                return
+
             self._measure_split_time(checkpoint=3)
             self._first_split_time_measured = True
 
     def _stop_watch(self, button_id):
         if self._first_split_time_measured and self.is_running:
             if button_id == self._buttons['stop_button_1']:
-                self._measure_split_time(checkpoint=2)
-            elif button_id == self._buttons['stop_button_2']:
+                if self._checkpoint_1_measured:
+                    logging.warning("Repeated measure on checkpoint 1")
+                    return
+
                 self._measure_split_time(checkpoint=1)
+                self._checkpoint_1_measured = True
+            elif button_id == self._buttons['stop_button_2']:
+                if self._checkpoint_2_measured:
+                    logging.warning("Repeated measure on checkpoint 2")
+                    return
+
+                self._measure_split_time(checkpoint=2)
+                self._checkpoint_2_measured = True
 
             # This method will be triggered by two sensors.
             # The one which triggers last will stop the clock.
@@ -398,6 +417,8 @@ class StopWatch(object):
         self._is_running = False
         self._should_stop_clock = False
         self._first_split_time_measured = False
+        self._checkpoint_1_measured = False
+        self._checkpoint_2_measured = False
         self._times = []
         self._parent.post_on_ui_thread(self.STOPWATCH_RESET)
 
@@ -485,7 +506,7 @@ class PressureTransducer(object):
             while True:
                 if not self._is_measuring:
                     self._update_sliding_avg_pressure_thread()
-                time.sleep(1/avg_samples_no)
+                time.sleep(1 / avg_samples_no)
 
         try:
             # Init I2C bus
