@@ -29,6 +29,8 @@ CONFIG_PATH = 'config.json'
 RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
 FLOW_K_DEFAULT_VALUE = 8.34
 FLOW_Q_DEFAULT_VALUE = 0.229
+PRESSURE_K_DEFAULT_VALUE = 20
+PRESSURE_Q_DEFAULT_VALUE = 0
 MANUAL_MEASUREMENT_DATA_DISPLAY_SECONDS = 2
 
 
@@ -548,6 +550,15 @@ class PressureTransducer(object):
                     self._update_sliding_avg_pressure_thread()
                 time.sleep(1 / avg_samples_no)
 
+        if parent.configuration is not None:
+            try:
+                self._k = parent.configuration['tlak']['k']
+                self._q = parent.configuration['tlak']['q']
+            except KeyError or AttributeError:
+                logging.warning("Pressure variables are not properly defined in a config!")
+                self._k = PRESSURE_K_DEFAULT_VALUE
+                self._q = PRESSURE_Q_DEFAULT_VALUE
+
         try:
             # Init I2C bus
             if 'busio' in sys.modules:
@@ -598,14 +609,12 @@ class PressureTransducer(object):
                 [self._adc_channels[0].value, self._adc_channels[1].value])
         )
 
-    # noinspection PyTypeChecker
-    @staticmethod
-    def _calculate_pressure_from_input_value(voltage):
+    def _calculate_pressure_from_input_value(self, voltage):
         # There is voltage divider on the input, so:
         # 5 V DC = 100 bar (full scale)
         # 1 V DC = 20 bar
         # 1 bar = 0.05 V DC
-        pressure = voltage * 20
+        pressure = self._k * voltage + self._q
         return int(pressure)
 
     def get_sliding_avg_pressure(self):
