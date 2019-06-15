@@ -6,10 +6,9 @@ import queue
 import tkinter as tk
 import csv
 import json
-import board
-import busio
 import adafruit_ads1x15.ads1115 as ads
 import numpy
+import sys
 from adafruit_ads1x15.ads1x15 import Mode
 from adafruit_ads1x15.analog_in import AnalogIn
 from tkinter import ttk
@@ -18,6 +17,11 @@ from gpiozero import Button
 from pathlib import Path
 from datetime import datetime as dtime
 from collections import deque
+
+try:
+    import busio, board
+except FileNotFoundError:
+    logging.warning('Bussio: Unsupported hardware. Disabling I2C feature.')
 
 # Default file path if not specified in config file
 CSV_FILE_PATH = 'stopwatch_log.csv'
@@ -241,13 +245,16 @@ class MainApp(object):
             if not Path(csv_file).exists():
                 write_header = True
 
-            with open(csv_file, 'a', newline='') as f:
-                writer = csv.writer(f)
+            try:
+                with open(csv_file, 'a', newline='') as f:
+                    writer = csv.writer(f)
 
-                if write_header:
-                    writer.writerow(header)
+                    if write_header:
+                        writer.writerow(header)
 
-                writer.writerow(data)
+                    writer.writerow(data)
+            except FileNotFoundError:
+                logging.error("Unable to create log file. Check path in \'config.json\'.")
 
         update_ui_stopwatch_time(self._stopwatch.get_current_time())
 
@@ -482,43 +489,47 @@ class PressureTransducer(object):
 
         try:
             # Init I2C bus
-            self._i2c = busio.I2C(board.SCL, board.SDA)
+            if 'busio' in sys.modules:
+                self._i2c = busio.I2C(board.SCL, board.SDA)
 
-            # Create instance of AD converter module
-            self._adc = ads.ADS1115(self._i2c)
-            self._i2c_initialized = True
+                # Create instance of AD converter module
+                self._adc = ads.ADS1115(self._i2c)
+                self._i2c_initialized = True
 
-            # Set gain to measure in range +/-6.144V
-            self._adc.gain(2 / 3)
+                # Set gain to measure in range +/-6.144V
+                self._adc.gain(2 / 3)
 
-            # Set data rate
-            self._adc.data_rate(128)
+                # Set data rate
+                self._adc.data_rate(128)
 
-            # Set continuous mode
-            self._adc.mode(Mode.SINGLE)
+                # Set continuous mode
+                self._adc.mode(Mode.SINGLE)
 
-            # Channels to read values from
-            self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
+                # Channels to read values from
+                self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
 
-            # Lists of voltages to compute sliding average from
-            self._voltage_1_samples = deque(maxlen=self.avg_samples_no)
-            self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
+                # Lists of voltages to compute sliding average from
+                self._voltage_1_samples = deque(maxlen=self.avg_samples_no)
+                self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
 
-            self._is_measuring = False
+                self._is_measuring = False
 
-            # Init thread to poll for data
-            self._worker = threading.Thread(target=runnable)
-            self._worker.daemon = True
-            self._worker.start()
+                # Init thread to poll for data
+                self._worker = threading.Thread(target=runnable)
+                self._worker.daemon = True
+                self._worker.start()
+            else:
+                self._i2c_initialized = False
 
         except ValueError:
             self._i2c_initialized = False
 
     def _update_sliding_avg_pressure_thread(self):
-        self._is_measuring = True
-        self._voltage_1_samples.append(self._adc_channels[0].voltage)
-        self._voltage_2_samples.append(self._adc_channels[1].voltage)
-        self._is_measuring = False
+        if self._i2c_initialized:
+            self._is_measuring = True
+            self._voltage_1_samples.append(self._adc_channels[0].voltage)
+            self._voltage_2_samples.append(self._adc_channels[1].voltage)
+            self._is_measuring = False
 
     def get_current_pressure(self):
         return 0, 0 if not self._i2c_initialized else tuple(
@@ -537,13 +548,15 @@ class PressureTransducer(object):
         return int(pressure)
 
     def get_sliding_avg_pressure(self):
-        # Sliding average is computed from _MAX_QUEUE_LENGTH samples
-        avg_p1 = numpy.cumsum(self._voltage_1_samples)
-        avg_p2 = numpy.cumsum(self._voltage_2_samples)
-        avg_p1 /= self.avg_samples_no
-        avg_p2 /= self.avg_samples_no
-        return 0, 0 if not self._i2c_initialized else tuple(
-            map(self._calculate_pressure_from_input_value, avg_p1, avg_p2))
+        if not self._i2c_initialized:
+            return 0, 0
+        else:
+            # Sliding average is computed from _MAX_QUEUE_LENGTH samples
+            avg_p1 = numpy.cumsum(self._voltage_1_samples)
+            avg_p2 = numpy.cumsum(self._voltage_2_samples)
+            avg_p1 /= self.avg_samples_no
+            avg_p2 /= self.avg_samples_no
+            return tuple(map(self._calculate_pressure_from_input_value, avg_p1, avg_p2))
 
 
 class RpmMeter(object):

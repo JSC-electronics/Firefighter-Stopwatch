@@ -1,5 +1,6 @@
-gpiozero
+RPi.GPIO
 pigpio
+gpiozero
 Pillow
 Adafruit-Blinka
 adafruit-circuitpython-ads1x15
