@@ -29,6 +29,7 @@ CONFIG_PATH = 'config.json'
 RPM_K_DEFAULT_VALUE = 1  # It should be in range 1..4
 FLOW_K_DEFAULT_VALUE = 8.34
 FLOW_Q_DEFAULT_VALUE = 0.229
+MANUAL_MEASUREMENT_DATA_DISPLAY_SECONDS = 2
 
 
 class MainApp(object):
@@ -136,17 +137,20 @@ class MainApp(object):
         label.grid(column=0, row=8, columnspan=5)
         label['text'] = 'Manuální měření'
 
-        self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': []}
+        self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [], 'symbol_label': None}
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel',
                           padding=self._MEASURE_ORDER_PADDING)
         label.grid(column=0, row=9)
         label['text'] = 'M'
+        self._manual_measurement_labels['symbol_label'] = label
+        label.grid_remove()
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
         label.grid(column=1, row=9)
         label['text'] = '               '
         self._manual_measurement_labels['split_times'].append(label)
+        label.grid_remove()
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
         label.grid(column=2, row=9)
@@ -162,6 +166,7 @@ class MainApp(object):
         label.grid(column=4, row=9)
         label['text'] = '        '
         self._manual_measurement_labels['pressure'].append(label)
+        self._manual_measurement_running = False
 
         # Queue for UI thread to update components
         self._thread_queue = queue.Queue()
@@ -194,12 +199,32 @@ class MainApp(object):
         def update_ui_stopwatch_time(stopwatch_time: str):
             self._stopwatch_label['text'] = stopwatch_time
 
+        def update_ui_set_current_measurement_data():
+            if not self._manual_measurement_running:
+                pressure = self._pressure.get_sliding_avg_pressure()
+                self._manual_measurement_labels['rpm'][0]['text'] = str(self._rpmmeter.get_current_rpm())
+                self._manual_measurement_labels['flow'][0]['text'] = str(self._flowmeter.get_current_flow())
+                self._manual_measurement_labels['pressure'][0]['text'] = '{}/{}'.format(pressure[0], pressure[1])
+
         def set_measurement_data(row=0, split_time='', rpm='', flow='', pressure='', is_manual_measure=False):
+            def runnable():
+                time.sleep(MANUAL_MEASUREMENT_DATA_DISPLAY_SECONDS)
+                self.post_on_ui_thread(StopWatch.MANUAL_MEASURE_ENDED)
+
             if is_manual_measure:
+                self._manual_measurement_running = True
+                self._manual_measurement_labels['symbol_label'].grid()
+                self._manual_measurement_labels['split_times'][0].grid()
+
                 self._manual_measurement_labels['split_times'][0]['text'] = split_time
                 self._manual_measurement_labels['rpm'][0]['text'] = rpm
                 self._manual_measurement_labels['flow'][0]['text'] = flow
                 self._manual_measurement_labels['pressure'][0]['text'] = pressure
+
+                worker = threading.Thread(target=runnable)
+                worker.daemon = True
+                worker.start()
+
             else:
                 if row is None or row < 0 or row > 3:
                     # raise ValueError("Automatic measurements have at most 4 rows!")
@@ -268,6 +293,7 @@ class MainApp(object):
             return mapping.get(checkpoint)
 
         update_ui_stopwatch_time(self._stopwatch.get_current_time())
+        update_ui_set_current_measurement_data()
 
         try:
             event = self._thread_queue.get(False)
@@ -276,6 +302,11 @@ class MainApp(object):
             if type(event) == str:
                 if event == StopWatch.STOPWATCH_RESET:
                     clear_measurement_data()
+                if event == StopWatch.MANUAL_MEASURE_ENDED:
+                    self._manual_measurement_labels['symbol_label'].grid_remove()
+                    self._manual_measurement_labels['split_times'][0].grid_remove()
+                    self._manual_measurement_running = False
+
             # Events with data as dicts (key = value)
             elif type(event) == dict:
                 checkpoint = None
@@ -326,6 +357,7 @@ class StopWatch(object):
     STOPWATCH_RESET = 'stopwatch_reset'
     SPLIT_TIME_MEASURED = 'split_time_measured'
     MANUAL_MEASURE_STARTED = 'manual_measure_started'
+    MANUAL_MEASURE_ENDED = 'manual_measure_ended'
     CHECKPOINT = 'checkpoint'
 
     # GPIO input pins
@@ -427,6 +459,7 @@ class StopWatch(object):
         self._checkpoint_1_measured = False
         self._checkpoint_2_measured = False
         self._times = []
+        self._manual_measurement_running = False
         self._parent.post_on_ui_thread(self.STOPWATCH_RESET)
 
     def _measure_split_time(self, checkpoint: int):
