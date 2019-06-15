@@ -1,22 +1,22 @@
 # coding=utf-8
-import logging
+import sys
 import time
-import threading
-import queue
-import tkinter as tk
+
+import adafruit_ads1x15.ads1115 as ads
 import csv
 import json
-import adafruit_ads1x15.ads1115 as ads
-import numpy
-import sys
+import logging
+import queue
+import threading
+import tkinter as tk
+from PIL import ImageTk
 from adafruit_ads1x15.ads1x15 import Mode
 from adafruit_ads1x15.analog_in import AnalogIn
-from tkinter import ttk
-from PIL import ImageTk
+from collections import deque
+from datetime import datetime as dtime
 from gpiozero import Button
 from pathlib import Path
-from datetime import datetime as dtime
-from collections import deque
+from tkinter import ttk
 
 try:
     import busio, board
@@ -613,11 +613,9 @@ class PressureTransducer(object):
             return 0, 0
         else:
             # Sliding average is computed from _MAX_QUEUE_LENGTH samples
-            avg_p1 = numpy.cumsum(self._voltage_1_samples)
-            avg_p2 = numpy.cumsum(self._voltage_2_samples)
-            avg_p1 /= self.avg_samples_no
-            avg_p2 /= self.avg_samples_no
-            return tuple(map(self._calculate_pressure_from_input_value, avg_p1, avg_p2))
+            avg_p1 = sum(self._voltage_1_samples) / self.avg_samples_no
+            avg_p2 = sum(self._voltage_2_samples) / self.avg_samples_no
+            return tuple(map(self._calculate_pressure_from_input_value, [avg_p1, avg_p2]))
 
 
 class RpmMeter(object):
