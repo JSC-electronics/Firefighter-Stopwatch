@@ -370,7 +370,7 @@ class StopWatch(object):
     # Each triggering will record data at a given moment.
     _STOPWATCH_STOP_TRIGGER_PINS = [6, 13]
     _STOPWATCH_RESET_PIN = 21
-    _MANUAL_MEASURE_PIN = 5
+    _MANUAL_MEASURE_PIN = 20
 
     def __init__(self, parent: MainApp):
         # Store time points from which we'll calculate delta values
@@ -496,7 +496,7 @@ class StopWatch(object):
 
 
 class FlowMeter(object):
-    _FLOW_SENSOR_PIN = 16
+    _FLOW_SENSOR_PIN = 12
     _MAX_QUEUE_LENGTH = 5
 
     def __init__(self, parent: MainApp):
@@ -642,7 +642,7 @@ class RpmMeter(object):
 
     """
 
-    _RPM_SENSOR_PIN = 20
+    _RPM_SENSOR_PIN = 16
     _MAX_QUEUE_LENGTH = 10
 
     def __init__(self, parent: MainApp):
