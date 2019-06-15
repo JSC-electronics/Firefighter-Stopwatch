@@ -94,8 +94,15 @@ class MainApp(object):
             label.grid(column=icon_col, row=2)
             icon_col += 1
 
+        icon_units = ['', '(RPM)', '(l/min)', '(bar)']
+        icon_col = 1
+        for unit in icon_units:
+            label = ttk.Label(content_frame, style='Customized.Main.TLabel', text=unit)
+            label.grid(column=icon_col, row=3)
+            icon_col += 1
+
         # Auto-measurement rows
-        initial_row = 3
+        initial_row = 4
         self._auto_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': []}
 
         for row in range(4):
@@ -126,33 +133,33 @@ class MainApp(object):
 
         # Manual measurement label
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
-        label.grid(column=0, row=7, columnspan=5)
+        label.grid(column=0, row=8, columnspan=5)
         label['text'] = 'Manuální měření'
 
         self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': []}
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel',
                           padding=self._MEASURE_ORDER_PADDING)
-        label.grid(column=0, row=8)
+        label.grid(column=0, row=9)
         label['text'] = 'M'
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
-        label.grid(column=1, row=8)
+        label.grid(column=1, row=9)
         label['text'] = '               '
         self._manual_measurement_labels['split_times'].append(label)
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
-        label.grid(column=2, row=8)
+        label.grid(column=2, row=9)
         label['text'] = '      '
         self._manual_measurement_labels['rpm'].append(label)
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
-        label.grid(column=3, row=8)
+        label.grid(column=3, row=9)
         label['text'] = '               '
         self._manual_measurement_labels['flow'].append(label)
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
-        label.grid(column=4, row=8)
+        label.grid(column=4, row=9)
         label['text'] = '        '
         self._manual_measurement_labels['pressure'].append(label)
 
