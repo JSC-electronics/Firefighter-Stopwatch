@@ -542,14 +542,14 @@ class PressureTransducer(object):
     def __init__(self, parent: MainApp, avg_samples_no=None):
         self._parent = parent
         self._i2c_initialized = False
-        self.avg_samples_no = self._SAMPLES_FOR_SLIDING_AVG if avg_samples_no is None \
+        self._avg_samples_no = self._SAMPLES_FOR_SLIDING_AVG if avg_samples_no is None \
             else avg_samples_no
 
         def runnable():
             while True:
                 if not self._is_measuring:
                     self._update_sliding_avg_pressure_thread()
-                time.sleep(1 / avg_samples_no)
+                time.sleep(1 / self._avg_samples_no)
 
         if parent.configuration is not None:
             try:
@@ -582,8 +582,8 @@ class PressureTransducer(object):
                 self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
 
                 # Lists of voltages to compute sliding average from
-                self._voltage_1_samples = deque(maxlen=self.avg_samples_no)
-                self._voltage_2_samples = deque(maxlen=self.avg_samples_no)
+                self._voltage_1_samples = deque(maxlen=self._avg_samples_no)
+                self._voltage_2_samples = deque(maxlen=self._avg_samples_no)
 
                 self._is_measuring = False
 
@@ -623,8 +623,8 @@ class PressureTransducer(object):
             return 0, 0
         else:
             # Sliding average is computed from _MAX_QUEUE_LENGTH samples
-            avg_p1 = sum(self._voltage_1_samples) / self.avg_samples_no
-            avg_p2 = sum(self._voltage_2_samples) / self.avg_samples_no
+            avg_p1 = sum(self._voltage_1_samples) / self._avg_samples_no
+            avg_p2 = sum(self._voltage_2_samples) / self._avg_samples_no
             return tuple(map(self._calculate_pressure_from_input_value, [avg_p1, avg_p2]))
 
 
