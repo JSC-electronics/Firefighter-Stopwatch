@@ -114,24 +114,21 @@ class MainApp(object):
             label.grid(column=0, row=initial_row + row)
             label['text'] = str(row + 1)
 
-            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=10,
+                              anchor='center')
             label.grid(column=1, row=initial_row + row)
-            label['text'] = '               '
             self._auto_measurement_labels['split_times'].append(label)
 
-            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=6, anchor='center')
             label.grid(column=2, row=initial_row + row)
-            label['text'] = '      '
             self._auto_measurement_labels['rpm'].append(label)
 
-            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=6, anchor='center')
             label.grid(column=3, row=initial_row + row)
-            label['text'] = '               '
             self._auto_measurement_labels['flow'].append(label)
 
-            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+            label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=8, anchor='center')
             label.grid(column=4, row=initial_row + row)
-            label['text'] = '        '
             self._auto_measurement_labels['pressure'].append(label)
 
         # Manual measurement label
@@ -149,25 +146,21 @@ class MainApp(object):
         self._manual_measurement_labels['symbol_label'] = label
         label.grid_remove()
 
-        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=10, anchor='center')
         label.grid(column=1, row=9)
-        label['text'] = '               '
         self._manual_measurement_labels['split_times'].append(label)
         label.grid_remove()
 
-        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=6, anchor='center')
         label.grid(column=2, row=9)
-        label['text'] = '      '
         self._manual_measurement_labels['rpm'].append(label)
 
-        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=6, anchor='center')
         label.grid(column=3, row=9)
-        label['text'] = '               '
         self._manual_measurement_labels['flow'].append(label)
 
-        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10))
+        label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=(30, 10), width=8, anchor='center')
         label.grid(column=4, row=9)
-        label['text'] = '        '
         self._manual_measurement_labels['pressure'].append(label)
         self._manual_measurement_running = False
 
@@ -239,19 +232,13 @@ class MainApp(object):
                 self._auto_measurement_labels['pressure'][row]['text'] = pressure
 
         def clear_measurement_data():
-            # We put empty spaces to avoid collapsing the layout too much
-            cleared_time = '               '
-            cleared_rpm = '      '
-            cleared_flow = '               '
-            cleared_pressure = '        '
-
             for idx in range(4):
-                set_measurement_data(row=idx, split_time=cleared_time, rpm=cleared_rpm,
-                                     flow=cleared_flow, pressure=cleared_pressure,
+                set_measurement_data(row=idx, split_time='', rpm='',
+                                     flow='', pressure='',
                                      is_manual_measure=False)
 
-            set_measurement_data(row=0, split_time=cleared_time, rpm=cleared_rpm,
-                                 flow=cleared_flow, pressure=cleared_pressure,
+            set_measurement_data(row=0, split_time='', rpm='',
+                                 flow='', pressure='',
                                  is_manual_measure=True)
 
         def write_log_to_csv(checkpoint='', split_time='', flow='', rpm='',
