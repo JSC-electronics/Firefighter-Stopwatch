@@ -499,6 +499,8 @@ class StopWatch(object):
 class FlowMeter(object):
     _FLOW_SENSOR_PIN = 12
     _MAX_QUEUE_LENGTH = 5
+    _MIN_LPM = 0
+    _MAX_LPM = 99999
 
     def __init__(self, parent: MainApp):
         self._parent = parent
@@ -525,9 +527,13 @@ class FlowMeter(object):
             lpm = 0
         else:
             f = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH)
-            lpm = self._k * (f + self._q)
+            lpm = int(self._k * (f + self._q))
 
-        return int(lpm)
+            if lpm not in range(self._MIN_LPM, self._MAX_LPM + 1):
+                logging.warning("RPM is out of range! Value: {}".format(lpm))
+                lpm = self._MAX_LPM
+
+        return lpm
 
 
 class PressureTransducer(object):
@@ -538,6 +544,8 @@ class PressureTransducer(object):
     # - voltage output:     0–10 V DC
 
     _SAMPLES_FOR_SLIDING_AVG = 25
+    _MIN_PRESSURE = 0
+    _MAX_PRESSURE = 100
 
     def __init__(self, parent: MainApp, avg_samples_no=None):
         self._parent = parent
@@ -615,8 +623,13 @@ class PressureTransducer(object):
         # 5 V DC = 100 bar (full scale)
         # 1 V DC = 20 bar
         # 1 bar = 0.05 V DC
-        pressure = self._k * voltage + self._q
-        return int(pressure)
+        pressure = int(self._k * voltage + self._q)
+
+        if pressure not in range(self._MIN_PRESSURE, self._MAX_PRESSURE + 1):
+            logging.warning("Pressure is out of range! Value: {}".format(pressure))
+            pressure = self._MAX_PRESSURE
+
+        return pressure
 
     def get_sliding_avg_pressure(self):
         if not self._i2c_initialized:
@@ -645,6 +658,8 @@ class RpmMeter(object):
 
     _RPM_SENSOR_PIN = 16
     _MAX_QUEUE_LENGTH = 10
+    _MIN_RPM = 0
+    _MAX_RPM = 99999
 
     def __init__(self, parent: MainApp):
         self._parent = parent
@@ -670,7 +685,13 @@ class RpmMeter(object):
             return 0
         else:
             freq = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH) / self._k_multiplier
-            return int(freq * 60)  # RPM
+            rpm = int(freq * 60)
+
+            if rpm not in range(self._MIN_RPM, self._MAX_RPM + 1):
+                logging.warning("RPM is out of range! Value: {}".format(rpm))
+                rpm = self._MAX_RPM
+
+            return rpm
 
 
 if __name__ == "__main__":
