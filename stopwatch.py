@@ -570,13 +570,13 @@ class PressureTransducer(object):
                 self._i2c_initialized = True
 
                 # Set gain to measure in range +/-6.144V
-                self._adc.gain(2 / 3)
+                self._adc.gain = 2 / 3
 
                 # Set data rate
-                self._adc.data_rate(128)
+                self._adc.data_rate = 128
 
                 # Set continuous mode
-                self._adc.mode(Mode.SINGLE)
+                self._adc.mode = Mode.SINGLE
 
                 # Channels to read values from
                 self._adc_channels = [AnalogIn(self._adc, ads.P0), AnalogIn(self._adc, ads.P1)]
