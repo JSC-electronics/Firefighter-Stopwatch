@@ -369,6 +369,7 @@ class StopWatch(object):
 
         # Store time points from which we'll calculate delta values
         self._times = []
+        self._cleared = True
         self._is_running = False
         self._should_stop_clock = False
         self._parent = parent
@@ -409,8 +410,9 @@ class StopWatch(object):
         return self._is_running
 
     def _start_watch(self):
-        if not self.is_running:
+        if self._cleared and not self.is_running:
             self._measure_split_time(checkpoint=4)
+            self._cleared = False
             self._is_running = True
             self._parent.post_on_ui_thread(self.STOPWATCH_STARTED)
 
@@ -449,6 +451,7 @@ class StopWatch(object):
                 self._should_stop_clock = True
 
     def _reset_watch(self):
+        self._cleared = True
         self._is_running = False
         self._should_stop_clock = False
         self._first_split_time_measured = False
