@@ -139,7 +139,8 @@ class MainApp(object):
         label.grid(column=0, row=8, columnspan=5)
         label['text'] = 'Manuální měření'
 
-        self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [], 'symbol_label': None}
+        self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [],
+                                           'symbol_label': None}
 
         label = ttk.Label(content_frame, style='Customized.Main.TLabel',
                           padding=self._MEASURE_ORDER_PADDING)
