@@ -33,13 +33,16 @@ PRESSURE_K_DEFAULT_VALUE = 20
 PRESSURE_Q_DEFAULT_VALUE = 0
 MANUAL_MEASUREMENT_DATA_DISPLAY_SECONDS = 2
 
+LOG_LEVEL = logging.WARNING
+
 
 class MainApp(object):
     _SCREEN_REFRESH_MS = 40
     _MEASURE_ORDER_PADDING = (50, 0)
 
     def __init__(self, parent):
-        logging.basicConfig(level=logging.INFO)
+        self._logger = logging.getLogger('MainApp')
+        self._logger.setLevel(LOG_LEVEL)
         self._load_config()
 
         self._parent = parent
@@ -271,7 +274,7 @@ class MainApp(object):
 
                     writer.writerow(data)
             except FileNotFoundError:
-                logging.error("Unable to create log file. Check path in \'config.json\'.")
+                self._logger.error("Unable to create log file. Check path in \'config.json\'.")
 
         def get_row_for_checkpoint(checkpoint: int):
             # checkpoint -> row mapping
@@ -332,7 +335,7 @@ class MainApp(object):
                                          pressure_2=str(pressure[1]), is_manual_measure=True)
 
                 if checkpoint is not None:
-                    logging.info("Split time measured on checkpoint {}".format(checkpoint))
+                    self._logger.info("Split time measured on checkpoint {}".format(checkpoint))
 
         except queue.Empty:
             pass
@@ -361,6 +364,9 @@ class StopWatch(object):
     _MANUAL_MEASURE_PIN = 20
 
     def __init__(self, parent: MainApp):
+        self._logger = logging.getLogger('StopWatch')
+        self._logger.setLevel(LOG_LEVEL)
+
         # Store time points from which we'll calculate delta values
         self._times = []
         self._is_running = False
@@ -411,7 +417,7 @@ class StopWatch(object):
     def _measure_first_split_time(self):
         if self.is_running:
             if self._first_split_time_measured:
-                logging.warning("Repeated measure on checkpoint 3")
+                self._logger.warning("Repeated measure on checkpoint 3")
                 return
 
             self._measure_split_time(checkpoint=3)
@@ -421,14 +427,14 @@ class StopWatch(object):
         if self._first_split_time_measured and self.is_running:
             if button_id == self._buttons['stop_button_1']:
                 if self._checkpoint_1_measured:
-                    logging.warning("Repeated measure on checkpoint 1")
+                    self._logger.warning("Repeated measure on checkpoint 1")
                     return
 
                 self._measure_split_time(checkpoint=1)
                 self._checkpoint_1_measured = True
             elif button_id == self._buttons['stop_button_2']:
                 if self._checkpoint_2_measured:
-                    logging.warning("Repeated measure on checkpoint 2")
+                    self._logger.warning("Repeated measure on checkpoint 2")
                     return
 
                 self._measure_split_time(checkpoint=2)
@@ -490,6 +496,9 @@ class FlowMeter(object):
     _MAX_LPM = 99999
 
     def __init__(self, parent: MainApp):
+        self._logger = logging.getLogger('FlowMeter')
+        self._logger.setLevel(LOG_LEVEL)
+
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
 
@@ -498,7 +507,7 @@ class FlowMeter(object):
                 self._k = parent.configuration['prutok']['k']
                 self._q = parent.configuration['prutok']['q']
             except KeyError or AttributeError:
-                logging.warning("Flow variables are not properly defined in a config!")
+                self._logger.warning("Flow variables are not properly defined in a config!")
                 self._k = FLOW_K_DEFAULT_VALUE
                 self._q = FLOW_Q_DEFAULT_VALUE
 
@@ -517,7 +526,7 @@ class FlowMeter(object):
             lpm = int(self._k * (f + self._q))
 
             if lpm not in range(self._MIN_LPM, self._MAX_LPM + 1):
-                logging.warning("RPM is out of range! Value: {}".format(lpm))
+                self._logger.debug("RPM is out of range! Value: {}".format(lpm))
                 lpm = self._MAX_LPM
 
         return lpm
@@ -535,6 +544,9 @@ class PressureTransducer(object):
     _MAX_PRESSURE = 100
 
     def __init__(self, parent: MainApp, avg_samples_no=None):
+        self._logger = logging.getLogger('PressureTransducer')
+        self._logger.setLevel(LOG_LEVEL)
+
         self._parent = parent
         self._i2c_initialized = False
         self._avg_samples_no = self._SAMPLES_FOR_SLIDING_AVG if avg_samples_no is None \
@@ -551,7 +563,7 @@ class PressureTransducer(object):
                 self._k = parent.configuration['tlak']['k']
                 self._q = parent.configuration['tlak']['q']
             except KeyError or AttributeError:
-                logging.warning("Pressure variables are not properly defined in a config!")
+                self._logger.warning("Pressure variables are not properly defined in a config!")
                 self._k = PRESSURE_K_DEFAULT_VALUE
                 self._q = PRESSURE_Q_DEFAULT_VALUE
 
@@ -613,7 +625,7 @@ class PressureTransducer(object):
         pressure = int(self._k * voltage + self._q)
 
         if pressure not in range(self._MIN_PRESSURE, self._MAX_PRESSURE + 1):
-            logging.warning("Pressure is out of range! Value: {}".format(pressure))
+            self._logger.debug("Pressure is out of range! Value: {}".format(pressure))
             pressure = self._MAX_PRESSURE
 
         return pressure
@@ -649,6 +661,9 @@ class RpmMeter(object):
     _MAX_RPM = 99999
 
     def __init__(self, parent: MainApp):
+        self._logger = logging.getLogger('RpmMeter')
+        self._logger.setLevel(LOG_LEVEL)
+
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
 
@@ -656,7 +671,7 @@ class RpmMeter(object):
             try:
                 self._k_multiplier = parent.configuration['otacky']['k']
             except KeyError or AttributeError:
-                logging.warning("RPM variables are not properly defined in a config!")
+                self._logger.warning("RPM variables are not properly defined in a config!")
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
         self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
@@ -675,7 +690,7 @@ class RpmMeter(object):
             rpm = int(freq * 60)
 
             if rpm not in range(self._MIN_RPM, self._MAX_RPM + 1):
-                logging.warning("RPM is out of range! Value: {}".format(rpm))
+                self._logger.debug("RPM is out of range! Value: {}".format(rpm))
                 rpm = self._MAX_RPM
 
             return rpm
