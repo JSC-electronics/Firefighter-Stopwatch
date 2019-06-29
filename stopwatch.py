@@ -354,12 +354,13 @@ class StopWatch(object):
     CHECKPOINT = 'checkpoint'
 
     # GPIO input pins
-    _STOPWATCH_TRIGGER_PIN = 26
-    _STOPWATCH_SPLIT_TIME_TRIGGER_PIN = 19
+    _STOPWATCH_TRIGGER_PIN = 7
+    _STOPWATCH_SPLIT_TIME_TRIGGER_PIN = 8
 
     # Whichever pin is triggered last will stop the watch.
     # Each triggering will record data at a given moment.
-    _STOPWATCH_STOP_TRIGGER_PINS = [6, 13]
+    _STOPWATCH_STOP_TRIGGER_PINS = [11, 25]
+    
     _STOPWATCH_RESET_PIN = 21
     _MANUAL_MEASURE_PIN = 20
 
@@ -493,7 +494,7 @@ class StopWatch(object):
 
 
 class FlowMeter(object):
-    _FLOW_SENSOR_PIN = 12
+    _FLOW_SENSOR_PIN = 26
     _MAX_QUEUE_LENGTH = 5
     _MIN_LPM = 0
     _MAX_LPM = 99999
