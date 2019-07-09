@@ -20,7 +20,7 @@ from tkinter import ttk
 
 try:
     import busio, board
-except FileNotFoundError:
+except (FileNotFoundError, NotImplementedError):
     logging.warning('Bussio: Unsupported hardware. Disabling I2C feature.')
 
 # Default file path if not specified in config file
@@ -259,7 +259,7 @@ class MainApp(object):
             if self.configuration is not None:
                 try:
                     csv_file = self.configuration['logovani']['umisteni']
-                except KeyError or AttributeError:
+                except (KeyError, AttributeError):
                     csv_file = CSV_FILE_PATH
 
             if not Path(csv_file).exists():
@@ -510,7 +510,7 @@ class FlowMeter(object):
             try:
                 self._k = parent.configuration['prutok']['k']
                 self._q = parent.configuration['prutok']['q']
-            except KeyError or AttributeError:
+            except (KeyError, AttributeError):
                 self._logger.warning("Flow variables are not properly defined in a config!")
                 self._k = FLOW_K_DEFAULT_VALUE
                 self._q = FLOW_Q_DEFAULT_VALUE
@@ -566,14 +566,14 @@ class PressureTransducer(object):
             try:
                 self._k = parent.configuration['tlak']['k']
                 self._q = parent.configuration['tlak']['q']
-            except KeyError or AttributeError:
+            except (KeyError, AttributeError):
                 self._logger.warning("Pressure variables are not properly defined in a config!")
                 self._k = PRESSURE_K_DEFAULT_VALUE
                 self._q = PRESSURE_Q_DEFAULT_VALUE
 
         try:
             # Init I2C bus
-            if 'busio' in sys.modules:
+            if 'busio' in sys.modules and 'board' in sys.modules:
                 self._i2c = busio.I2C(board.SCL, board.SDA)
 
                 # Create instance of AD converter module
