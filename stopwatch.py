@@ -17,10 +17,11 @@ from datetime import datetime as dtime
 from gpiozero import Button
 from pathlib import Path
 from tkinter import ttk
+import RPi.GPIO as GPIO
 
 try:
     import busio, board
-except (FileNotFoundError, NotImplementedError):
+except FileNotFoundError:
     logging.warning('Bussio: Unsupported hardware. Disabling I2C feature.')
 
 # Default file path if not specified in config file
@@ -259,7 +260,7 @@ class MainApp(object):
             if self.configuration is not None:
                 try:
                     csv_file = self.configuration['logovani']['umisteni']
-                except (KeyError, AttributeError):
+                except KeyError or AttributeError:
                     csv_file = CSV_FILE_PATH
 
             if not Path(csv_file).exists():
@@ -384,22 +385,22 @@ class StopWatch(object):
         # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
         # Apparently this bug does occur only on a PC, not RPi.
 
-        start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
+        start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
         start_button.when_pressed = lambda: self._start_watch()
-
-        split_time_button = Button(self._STOPWATCH_SPLIT_TIME_TRIGGER_PIN, pull_up=True, bounce_time=0.1)
+        
+        split_time_button = Button(self._STOPWATCH_SPLIT_TIME_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
         split_time_button.when_pressed = lambda: self._measure_first_split_time()
 
-        stop_button_1 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[0], pull_up=True, bounce_time=0.1)
+        stop_button_1 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[0], pull_up=True, bounce_time=0.01)
         stop_button_1.when_pressed = lambda button: self._stop_watch(button)
 
-        stop_button_2 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[1], pull_up=True, bounce_time=0.1)
+        stop_button_2 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[1], pull_up=True, bounce_time=0.01)
         stop_button_2.when_pressed = lambda button: self._stop_watch(button)
 
-        manual_measure_button = Button(self._MANUAL_MEASURE_PIN, pull_up=True, bounce_time=0.1)
+        manual_measure_button = Button(self._MANUAL_MEASURE_PIN, pull_up=True, bounce_time=0.01)
         manual_measure_button.when_pressed = lambda: self._run_manual_measurement()
 
-        reset_button = Button(self._STOPWATCH_RESET_PIN, pull_up=True, bounce_time=0.1)
+        reset_button = Button(self._STOPWATCH_RESET_PIN, pull_up=True, bounce_time=0.01)
         reset_button.when_pressed = lambda: self._reset_watch()
 
         self._buttons = {'start_button': start_button, 'split_time_button': split_time_button,
@@ -510,7 +511,7 @@ class FlowMeter(object):
             try:
                 self._k = parent.configuration['prutok']['k']
                 self._q = parent.configuration['prutok']['q']
-            except (KeyError, AttributeError):
+            except KeyError or AttributeError:
                 self._logger.warning("Flow variables are not properly defined in a config!")
                 self._k = FLOW_K_DEFAULT_VALUE
                 self._q = FLOW_Q_DEFAULT_VALUE
@@ -566,14 +567,14 @@ class PressureTransducer(object):
             try:
                 self._k = parent.configuration['tlak']['k']
                 self._q = parent.configuration['tlak']['q']
-            except (KeyError, AttributeError):
+            except KeyError or AttributeError:
                 self._logger.warning("Pressure variables are not properly defined in a config!")
                 self._k = PRESSURE_K_DEFAULT_VALUE
                 self._q = PRESSURE_Q_DEFAULT_VALUE
 
         try:
             # Init I2C bus
-            if 'busio' in sys.modules and 'board' in sys.modules:
+            if 'busio' in sys.modules:
                 self._i2c = busio.I2C(board.SCL, board.SDA)
 
                 # Create instance of AD converter module
@@ -663,6 +664,7 @@ class RpmMeter(object):
     _MAX_QUEUE_LENGTH = 10
     _MIN_RPM = 0
     _MAX_RPM = 99999
+    _AVG_SAMPLES = 25
 
     def __init__(self, parent: MainApp):
         self._logger = logging.getLogger('RpmMeter')
@@ -670,7 +672,14 @@ class RpmMeter(object):
 
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
-
+        
+        # variables for running/moving average
+        self._avg = deque(maxlen=self._AVG_SAMPLES)
+        
+        # variables for exponentially weighted average
+        self._alpha = 1.0/self._AVG_SAMPLES # or 2.0/(self._AVG_SAMPLES+1)
+        self._expAVG = 0
+        
         if parent.configuration is not None:
             try:
                 self._k_multiplier = parent.configuration['otacky']['k']
@@ -691,6 +700,7 @@ class RpmMeter(object):
             return 0
         else:
             freq = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH) / self._k_multiplier
+            freq = self.get_exp_avg(self._expAVG,freq) # or self.get_running_avg(freq)
             rpm = int(freq * 60)
 
             if rpm not in range(self._MIN_RPM, self._MAX_RPM + 1):
@@ -698,6 +708,23 @@ class RpmMeter(object):
                 rpm = self._MAX_RPM
 
             return rpm
+            
+    def get_running_avg(self,x):
+        # if the queue is empty then fill it with values of x
+        if(self._avg == deque([])):
+            for i in range(self._AVG_SAMPLES):
+                self._avg.append(x)
+        self._avg.append(x)
+        self._avg.popleft()
+        avg = 0
+        for i in self._avg:
+            avg += i
+        avg = avg/float(self._AVG_SAMPLES)
+        return avg
+        
+    def get_exp_avg(self,currentExpAvg,newSample):
+        avg = (1-self._alpha)*currentExpAvg + self._alpha*newSample
+        return avg
 
 
 if __name__ == "__main__":
