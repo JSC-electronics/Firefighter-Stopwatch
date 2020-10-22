@@ -1,0 +1,125 @@
+# Firefighter Stopwatch Language file
+# Copyright (C) 2020 JSC electronics s.r.o.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-10-22 15:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: stopwatch.py:29
+msgid "Bussio: Unsupported hardware. Disabling I2C feature."
+msgstr ""
+
+#: stopwatch.py:56
+msgid "Firefighter Stopwatch"
+msgstr ""
+
+#: stopwatch.py:97
+msgid "Auto measurement"
+msgstr ""
+
+#: stopwatch.py:110
+msgid "(RPM)"
+msgstr ""
+
+#: stopwatch.py:110
+msgid "(bar)"
+msgstr ""
+
+#: stopwatch.py:110
+msgid "(l/min)"
+msgstr ""
+
+#: stopwatch.py:147
+msgid "Manual measurement"
+msgstr ""
+
+#: stopwatch.py:257
+msgid "Checkpoint"
+msgstr ""
+
+#: stopwatch.py:257
+msgid "Flow (l/min)"
+msgstr ""
+
+#: stopwatch.py:257
+msgid "Measurement date and time"
+msgstr ""
+
+#: stopwatch.py:257
+msgid "Time"
+msgstr ""
+
+#: stopwatch.py:258
+msgid "Engine revs (1/min)"
+msgstr ""
+
+#: stopwatch.py:258
+msgid "Pressure #1 (bar)"
+msgstr ""
+
+#: stopwatch.py:258
+msgid "Pressure #2 (bar)"
+msgstr ""
+
+#: stopwatch.py:259
+msgid "Flag for auto/manual measurement {A, M}"
+msgstr ""
+
+#: stopwatch.py:284
+msgid "Unable to create log file. Check path in 'config.json'."
+msgstr ""
+
+#: stopwatch.py:345
+msgid "Split time measured on checkpoint {}"
+msgstr ""
+
+#: stopwatch.py:418
+msgid "Gpiozero: Unable to load pin factory. Most probably, you're running this application on a PC. In this case, you can setup remote GPIO. See the docs."
+msgstr ""
+
+#: stopwatch.py:436
+msgid "Repeated measure on checkpoint 3"
+msgstr ""
+
+#: stopwatch.py:446
+msgid "Repeated measure on checkpoint 1"
+msgstr ""
+
+#: stopwatch.py:453
+msgid "Repeated measure on checkpoint 2"
+msgstr ""
+
+#: stopwatch.py:527
+msgid "Flow variables are not properly defined in a config!"
+msgstr ""
+
+#: stopwatch.py:549
+msgid "Flow is out of range! Value: {}"
+msgstr ""
+
+#: stopwatch.py:586
+msgid "Pressure variables are not properly defined in a config!"
+msgstr ""
+
+#: stopwatch.py:648
+msgid "Pressure is out of range! Value: {}"
+msgstr ""
+
+#: stopwatch.py:702
+msgid "RPM variables are not properly defined in a config!"
+msgstr ""
+
+#: stopwatch.py:725
+msgid "RPM is out of range! Value: {}"
+msgstr ""
+

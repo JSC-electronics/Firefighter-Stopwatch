@@ -1,0 +1,125 @@
+# Firefighter Stopwatch Language file
+# Copyright (C) 2020 JSC electronics s.r.o.
+# Vladimír Záhradník <vladimir.zahradnik@jsce.cz>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-10-22 15:25+0200\n"
+"PO-Revision-Date: 2020-10-22 15:51+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sk_SK\n"
+"X-Generator: Poedit 2.4.1\n"
+
+#: stopwatch.py:29
+msgid "Bussio: Unsupported hardware. Disabling I2C feature."
+msgstr "Bussio: Nepodporovaný hardvér. Funkcia I2C bude vypnutá."
+
+#: stopwatch.py:56
+msgid "Firefighter Stopwatch"
+msgstr "Hasičské stopky"
+
+#: stopwatch.py:97
+msgid "Auto measurement"
+msgstr "Automatické meranie"
+
+#: stopwatch.py:110
+msgid "(RPM)"
+msgstr "(RPM)"
+
+#: stopwatch.py:110
+msgid "(bar)"
+msgstr "(bar)"
+
+#: stopwatch.py:110
+msgid "(l/min)"
+msgstr "(l/min)"
+
+#: stopwatch.py:147
+msgid "Manual measurement"
+msgstr "Manuálne meranie"
+
+#: stopwatch.py:257
+msgid "Checkpoint"
+msgstr "Stanovisko"
+
+#: stopwatch.py:257
+msgid "Flow (l/min)"
+msgstr "Prietok (l/min)"
+
+#: stopwatch.py:257
+msgid "Measurement date and time"
+msgstr "Dátum a čas merania"
+
+#: stopwatch.py:257
+msgid "Time"
+msgstr "Čas"
+
+#: stopwatch.py:258
+msgid "Engine revs (1/min)"
+msgstr "Otáčky motora (1/min)"
+
+#: stopwatch.py:258
+msgid "Pressure #1 (bar)"
+msgstr "Tlak #1 (bar)"
+
+#: stopwatch.py:258
+msgid "Pressure #2 (bar)"
+msgstr "Tlak #2 (bar)"
+
+#: stopwatch.py:259
+msgid "Flag for auto/manual measurement {A, M}"
+msgstr "Príznak automatické/manuálne meranie {A, M}"
+
+#: stopwatch.py:284
+msgid "Unable to create log file. Check path in 'config.json'."
+msgstr "Nie je možné vytvoriť súbor denníka. Skontrolujte v súbore 'config.json' cestu."
+
+#: stopwatch.py:345
+msgid "Split time measured on checkpoint {}"
+msgstr "Medzičas nameraný na stanovišti {}"
+
+#: stopwatch.py:418
+msgid "Gpiozero: Unable to load pin factory. Most probably, you're running this application on a PC. In this case, you can setup remote GPIO. See the docs."
+msgstr "Gpiozero: Nie je možné načítať kód pre ovládanie pinov. Pravdepodobne túto aplikáciu spúšťate na počítači. V takom prípade si môžete nastaviť vzdialené GPIO. Pozrite si dokumentáciu."
+
+#: stopwatch.py:436
+msgid "Repeated measure on checkpoint 3"
+msgstr "Opakované meranie na stanovisku 3"
+
+#: stopwatch.py:446
+msgid "Repeated measure on checkpoint 1"
+msgstr "Opakované meranie na stanovisku 1"
+
+#: stopwatch.py:453
+msgid "Repeated measure on checkpoint 2"
+msgstr "Opakované meranie na stanovisku 2"
+
+#: stopwatch.py:527
+msgid "Flow variables are not properly defined in a config!"
+msgstr "Premenné prietoku nie sú v konfigurácii správne definované!"
+
+#: stopwatch.py:549
+msgid "Flow is out of range! Value: {}"
+msgstr "Prietok je mimo rozsahu! Hodnota: {}"
+
+#: stopwatch.py:586
+msgid "Pressure variables are not properly defined in a config!"
+msgstr "Premenné tlaku nie sú v konfigurácii správne definované!"
+
+#: stopwatch.py:648
+msgid "Pressure is out of range! Value: {}"
+msgstr "Tlak je mimo rozsahu! Hodnota: {}"
+
+#: stopwatch.py:702
+msgid "RPM variables are not properly defined in a config!"
+msgstr "Premenné pre meranie otáčok nie sú v konfigurácii správne definované!"
+
+#: stopwatch.py:725
+msgid "RPM is out of range! Value: {}"
+msgstr "Otáčky sú mimo rozsahu! Hodnota: {}"

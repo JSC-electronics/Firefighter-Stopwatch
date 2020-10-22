@@ -14,15 +14,19 @@ from adafruit_ads1x15.ads1x15 import Mode
 from adafruit_ads1x15.analog_in import AnalogIn
 from collections import deque
 from datetime import datetime as dtime
-from gpiozero import Button
 from pathlib import Path
 from tkinter import ttk
-import RPi.GPIO as GPIO
+
+import gettext
+t = gettext.translation('stopwatch', 'l10n')
+_ = t.gettext
 
 try:
     import busio, board
-except FileNotFoundError:
-    logging.warning('Bussio: Unsupported hardware. Disabling I2C feature.')
+except (NotImplementedError, FileNotFoundError):
+    logging.warning(_('Bussio: Unsupported hardware. Disabling I2C feature.'))
+
+import gpiozero
 
 # Default file path if not specified in config file
 CSV_FILE_PATH = 'stopwatch_log.csv'
@@ -47,7 +51,7 @@ class MainApp(object):
         self._load_config()
 
         self._parent = parent
-        self._parent.title('Firefighter Stopwatch')
+        self._parent.title(_('Firefighter Stopwatch'))
         self._parent.columnconfigure(0, weight=1)
         self._parent.rowconfigure(0, weight=1)
 
@@ -88,7 +92,7 @@ class MainApp(object):
         # Automatic measurement label
         auto_measurement_label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         auto_measurement_label.grid(column=0, row=1, columnspan=5)
-        auto_measurement_label['text'] = 'Automatické měření'
+        auto_measurement_label['text'] = _('Auto measurement')
 
         # Icons
         icon_images = ['gfx/clock_icon.png', 'gfx/rpm_icon.png', 'gfx/flow_icon.png', 'gfx/pressure_icon.png']
@@ -101,7 +105,7 @@ class MainApp(object):
             label.grid(column=icon_col, row=2)
             icon_col += 1
 
-        icon_units = ['', '(RPM)', '(l/min)', '(bar)']
+        icon_units = ['', _('(RPM)'), _('(l/min)'), _('(bar)')]
         icon_col = 1
         for unit in icon_units:
             label = ttk.Label(content_frame, style='Customized.Main.TLabel', text=unit)
@@ -138,7 +142,7 @@ class MainApp(object):
         # Manual measurement label
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         label.grid(column=0, row=8, columnspan=5)
-        label['text'] = 'Manuální měření'
+        label['text'] = _('Manual measurement')
 
         self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [],
                                            'symbol_label': None}
@@ -248,9 +252,9 @@ class MainApp(object):
         def write_log_to_csv(checkpoint='', split_time='', flow='', rpm='',
                              pressure_1='', pressure_2='', is_manual_measure=False):
             write_header = False
-            header = ['Datum a čas měření', 'Stanoviště', 'Čas', 'Průtok (l/min)',
-                      'Otáčky motoru (1/min)', 'Tlak #1 (bar)', 'Tlak #2 (bar)',
-                      'Příznak automatické/manuální měření {A, M}']
+            header = [_('Measurement date and time'), _('Checkpoint'), _('Time'), _('Flow (l/min)'),
+                      _('Engine revs (1/min)'), _('Pressure #1 (bar)'), _('Pressure #2 (bar)'),
+                      _('Flag for auto/manual measurement {A, M}')]
 
             data = [dtime.now().isoformat(), checkpoint, split_time, flow, rpm, pressure_1, pressure_2,
                     'A' if not is_manual_measure else 'M']
@@ -259,7 +263,7 @@ class MainApp(object):
 
             if self.configuration is not None:
                 try:
-                    csv_file = self.configuration['logovani']['umisteni']
+                    csv_file = self.configuration['logging']['location']
                 except KeyError or AttributeError:
                     csv_file = CSV_FILE_PATH
 
@@ -275,7 +279,7 @@ class MainApp(object):
 
                     writer.writerow(data)
             except FileNotFoundError:
-                self._logger.error("Unable to create log file. Check path in \'config.json\'.")
+                self._logger.error(_("Unable to create log file. Check path in \'config.json\'."))
 
         def get_row_for_checkpoint(checkpoint: int):
             # checkpoint -> row mapping
@@ -336,7 +340,7 @@ class MainApp(object):
                                          pressure_2=str(pressure[1]), is_manual_measure=True)
 
                 if checkpoint is not None:
-                    self._logger.info("Split time measured on checkpoint {}".format(checkpoint))
+                    self._logger.info(_("Split time measured on checkpoint {}").format(checkpoint))
 
         except queue.Empty:
             pass
@@ -361,7 +365,7 @@ class StopWatch(object):
     # Whichever pin is triggered last will stop the watch.
     # Each triggering will record data at a given moment.
     _STOPWATCH_STOP_TRIGGER_PINS = [11, 25]
-    
+
     _STOPWATCH_RESET_PIN = 21
     _MANUAL_MEASURE_PIN = 20
 
@@ -381,31 +385,37 @@ class StopWatch(object):
         self._checkpoint_1_measured = False
         self._checkpoint_2_measured = False
 
-        # FIXME: All buttons except the first one cause 'when_pressed' to be triggered right after init.
-        # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
-        # Apparently this bug does occur only on a PC, not RPi.
+        try:
+            # FIXME: All buttons except the first one cause 'when_pressed' to be triggered right after init.
+            # Suspecting a bug in gpiozero library. Order of buttons is not relevant to reproduce this issue.
+            # Apparently this bug does occur only on a PC, not RPi.
 
-        start_button = Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
-        start_button.when_pressed = lambda: self._start_watch()
-        
-        split_time_button = Button(self._STOPWATCH_SPLIT_TIME_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
-        split_time_button.when_pressed = lambda: self._measure_first_split_time()
+            start_button = gpiozero.Button(self._STOPWATCH_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
+            start_button.when_pressed = lambda: self._start_watch()
 
-        stop_button_1 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[0], pull_up=True, bounce_time=0.01)
-        stop_button_1.when_pressed = lambda button: self._stop_watch(button)
+            split_time_button = gpiozero.Button(self._STOPWATCH_SPLIT_TIME_TRIGGER_PIN, pull_up=True, bounce_time=0.01)
+            split_time_button.when_pressed = lambda: self._measure_first_split_time()
 
-        stop_button_2 = Button(self._STOPWATCH_STOP_TRIGGER_PINS[1], pull_up=True, bounce_time=0.01)
-        stop_button_2.when_pressed = lambda button: self._stop_watch(button)
+            stop_button_1 = gpiozero.Button(self._STOPWATCH_STOP_TRIGGER_PINS[0], pull_up=True, bounce_time=0.01)
+            stop_button_1.when_pressed = lambda button: self._stop_watch(button)
 
-        manual_measure_button = Button(self._MANUAL_MEASURE_PIN, pull_up=True, bounce_time=0.01)
-        manual_measure_button.when_pressed = lambda: self._run_manual_measurement()
+            stop_button_2 = gpiozero.Button(self._STOPWATCH_STOP_TRIGGER_PINS[1], pull_up=True, bounce_time=0.01)
+            stop_button_2.when_pressed = lambda button: self._stop_watch(button)
 
-        reset_button = Button(self._STOPWATCH_RESET_PIN, pull_up=True, bounce_time=0.01)
-        reset_button.when_pressed = lambda: self._reset_watch()
+            manual_measure_button = gpiozero.Button(self._MANUAL_MEASURE_PIN, pull_up=True, bounce_time=0.01)
+            manual_measure_button.when_pressed = lambda: self._run_manual_measurement()
 
-        self._buttons = {'start_button': start_button, 'split_time_button': split_time_button,
-                         'stop_button_1': stop_button_1, 'stop_button_2': stop_button_2,
-                         'manual_measure_button': manual_measure_button, 'reset_button': reset_button}
+            reset_button = gpiozero.Button(self._STOPWATCH_RESET_PIN, pull_up=True, bounce_time=0.01)
+            reset_button.when_pressed = lambda: self._reset_watch()
+
+            self._buttons = {'start_button': start_button, 'split_time_button': split_time_button,
+                             'stop_button_1': stop_button_1, 'stop_button_2': stop_button_2,
+                             'manual_measure_button': manual_measure_button, 'reset_button': reset_button}
+        except:
+            logging.warning(
+                _('Gpiozero: Unable to load pin factory. Most probably, you\'re running this application on a PC. '
+                  'In this case, you can setup remote GPIO. See the docs.'))
+            self._buttons = {}
 
     @property
     def is_running(self):
@@ -421,7 +431,7 @@ class StopWatch(object):
     def _measure_first_split_time(self):
         if self.is_running:
             if self._first_split_time_measured:
-                self._logger.warning("Repeated measure on checkpoint 3")
+                self._logger.warning(_("Repeated measure on checkpoint 3"))
                 return
 
             self._measure_split_time(checkpoint=3)
@@ -431,14 +441,14 @@ class StopWatch(object):
         if self._first_split_time_measured and self.is_running:
             if button_id == self._buttons['stop_button_1']:
                 if self._checkpoint_1_measured:
-                    self._logger.warning("Repeated measure on checkpoint 1")
+                    self._logger.warning(_("Repeated measure on checkpoint 1"))
                     return
 
                 self._measure_split_time(checkpoint=1)
                 self._checkpoint_1_measured = True
             elif button_id == self._buttons['stop_button_2']:
                 if self._checkpoint_2_measured:
-                    self._logger.warning("Repeated measure on checkpoint 2")
+                    self._logger.warning(_("Repeated measure on checkpoint 2"))
                     return
 
                 self._measure_split_time(checkpoint=2)
@@ -509,15 +519,18 @@ class FlowMeter(object):
 
         if parent.configuration is not None:
             try:
-                self._k = parent.configuration['prutok']['k']
-                self._q = parent.configuration['prutok']['q']
+                self._k = parent.configuration['flow']['k']
+                self._q = parent.configuration['flow']['q']
             except KeyError or AttributeError:
-                self._logger.warning("Flow variables are not properly defined in a config!")
+                self._logger.warning(_("Flow variables are not properly defined in a config!"))
                 self._k = FLOW_K_DEFAULT_VALUE
                 self._q = FLOW_Q_DEFAULT_VALUE
 
-        self._flow_sensor = Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
-        self._flow_sensor.when_pressed = lambda: self._update_flow()
+        try:
+            self._flow_sensor = gpiozero.Button(self._FLOW_SENSOR_PIN, pull_up=True, bounce_time=0.001)
+            self._flow_sensor.when_pressed = lambda: self._update_flow()
+        except:
+            self._flow_sensor = None
 
     def _update_flow(self):
         self._samples.append(time.time())
@@ -531,7 +544,7 @@ class FlowMeter(object):
             lpm = int(self._k * (f + self._q))
 
             if lpm not in range(self._MIN_LPM, self._MAX_LPM + 1):
-                self._logger.debug("RPM is out of range! Value: {}".format(lpm))
+                self._logger.debug(_("Flow is out of range! Value: {}").format(lpm))
                 lpm = self._MAX_LPM
 
         return lpm
@@ -565,16 +578,16 @@ class PressureTransducer(object):
 
         if parent.configuration is not None:
             try:
-                self._k = parent.configuration['tlak']['k']
-                self._q = parent.configuration['tlak']['q']
+                self._k = parent.configuration['pressure']['k']
+                self._q = parent.configuration['pressure']['q']
             except KeyError or AttributeError:
-                self._logger.warning("Pressure variables are not properly defined in a config!")
+                self._logger.warning(_("Pressure variables are not properly defined in a config!"))
                 self._k = PRESSURE_K_DEFAULT_VALUE
                 self._q = PRESSURE_Q_DEFAULT_VALUE
 
         try:
             # Init I2C bus
-            if 'busio' in sys.modules:
+            if 'busio' in sys.modules and 'board' in sys.modules:
                 self._i2c = busio.I2C(board.SCL, board.SDA)
 
                 # Create instance of AD converter module
@@ -630,7 +643,7 @@ class PressureTransducer(object):
         pressure = int(self._k * voltage + self._q)
 
         if pressure not in range(self._MIN_PRESSURE, self._MAX_PRESSURE + 1):
-            self._logger.debug("Pressure is out of range! Value: {}".format(pressure))
+            self._logger.debug(_("Pressure is out of range! Value: {}").format(pressure))
             pressure = self._MAX_PRESSURE
 
         return pressure
@@ -672,23 +685,26 @@ class RpmMeter(object):
 
         self._parent = parent
         self._samples = deque(maxlen=self._MAX_QUEUE_LENGTH)
-        
+
         # variables for running/moving average
         self._avg = deque(maxlen=self._AVG_SAMPLES)
-        
+
         # variables for exponentially weighted average
-        self._alpha = 1.0/self._AVG_SAMPLES # or 2.0/(self._AVG_SAMPLES+1)
+        self._alpha = 1.0 / self._AVG_SAMPLES  # or 2.0/(self._AVG_SAMPLES+1)
         self._expAVG = 0
-        
+
         if parent.configuration is not None:
             try:
-                self._k_multiplier = parent.configuration['otacky']['k']
+                self._k_multiplier = parent.configuration['revs']['k']
             except KeyError or AttributeError:
-                self._logger.warning("RPM variables are not properly defined in a config!")
+                self._logger.warning(_("RPM variables are not properly defined in a config!"))
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
-        self._rpm_sensor = Button(self._RPM_SENSOR_PIN, pull_up=True)
-        self._rpm_sensor.when_pressed = lambda: self._update_rpm()
+        try:
+            self._rpm_sensor = gpiozero.Button(self._RPM_SENSOR_PIN, pull_up=True)
+            self._rpm_sensor.when_pressed = lambda: self._update_rpm()
+        except:
+            self._rpm_sensor = None
 
     def _update_rpm(self):
         self._samples.append(time.time())
@@ -700,18 +716,18 @@ class RpmMeter(object):
             return 0
         else:
             freq = 1 / ((self._samples[-1] - self._samples[0]) / self._MAX_QUEUE_LENGTH) / self._k_multiplier
-            freq = self.get_exp_avg(self._expAVG,freq) # or self.get_running_avg(freq)
+            freq = self.get_exp_avg(self._expAVG, freq)  # or self.get_running_avg(freq)
             rpm = int(freq * 60)
 
             if rpm not in range(self._MIN_RPM, self._MAX_RPM + 1):
-                self._logger.debug("RPM is out of range! Value: {}".format(rpm))
+                self._logger.debug(_("RPM is out of range! Value: {}").format(rpm))
                 rpm = self._MAX_RPM
 
             return rpm
-            
-    def get_running_avg(self,x):
+
+    def get_running_avg(self, x):
         # if the queue is empty then fill it with values of x
-        if(self._avg == deque([])):
+        if (self._avg == deque([])):
             for i in range(self._AVG_SAMPLES):
                 self._avg.append(x)
         self._avg.append(x)
@@ -719,11 +735,11 @@ class RpmMeter(object):
         avg = 0
         for i in self._avg:
             avg += i
-        avg = avg/float(self._AVG_SAMPLES)
+        avg = avg / float(self._AVG_SAMPLES)
         return avg
-        
-    def get_exp_avg(self,currentExpAvg,newSample):
-        avg = (1-self._alpha)*currentExpAvg + self._alpha*newSample
+
+    def get_exp_avg(self, current_exp_avg, new_sample):
+        avg = (1 - self._alpha) * current_exp_avg + self._alpha * new_sample
         return avg
 
 
