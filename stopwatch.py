@@ -88,7 +88,7 @@ class MainApp(object):
         # Automatic measurement label
         auto_measurement_label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         auto_measurement_label.grid(column=0, row=1, columnspan=5)
-        auto_measurement_label['text'] = 'Automatické měření'
+        auto_measurement_label['text'] = 'Auto measurement'
 
         # Icons
         icon_images = ['gfx/clock_icon.png', 'gfx/rpm_icon.png', 'gfx/flow_icon.png', 'gfx/pressure_icon.png']
@@ -138,7 +138,7 @@ class MainApp(object):
         # Manual measurement label
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         label.grid(column=0, row=8, columnspan=5)
-        label['text'] = 'Manuální měření'
+        label['text'] = 'Manual measurement'
 
         self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [],
                                            'symbol_label': None}
@@ -248,9 +248,9 @@ class MainApp(object):
         def write_log_to_csv(checkpoint='', split_time='', flow='', rpm='',
                              pressure_1='', pressure_2='', is_manual_measure=False):
             write_header = False
-            header = ['Datum a čas měření', 'Stanoviště', 'Čas', 'Průtok (l/min)',
-                      'Otáčky motoru (1/min)', 'Tlak #1 (bar)', 'Tlak #2 (bar)',
-                      'Příznak automatické/manuální měření {A, M}']
+            header = ['Measurement date and time', 'Checkpoint', 'Time', 'Flow (l/min)',
+                      'Engine revs (1/min)', 'Pressure #1 (bar)', 'Pressure #2 (bar)',
+                      'Flag for auto/manual measurement {A, M}']
 
             data = [dtime.now().isoformat(), checkpoint, split_time, flow, rpm, pressure_1, pressure_2,
                     'A' if not is_manual_measure else 'M']
@@ -259,7 +259,7 @@ class MainApp(object):
 
             if self.configuration is not None:
                 try:
-                    csv_file = self.configuration['logovani']['umisteni']
+                    csv_file = self.configuration['logging']['location']
                 except KeyError or AttributeError:
                     csv_file = CSV_FILE_PATH
 
@@ -515,8 +515,8 @@ class FlowMeter(object):
 
         if parent.configuration is not None:
             try:
-                self._k = parent.configuration['prutok']['k']
-                self._q = parent.configuration['prutok']['q']
+                self._k = parent.configuration['flow']['k']
+                self._q = parent.configuration['flow']['q']
             except KeyError or AttributeError:
                 self._logger.warning("Flow variables are not properly defined in a config!")
                 self._k = FLOW_K_DEFAULT_VALUE
@@ -540,7 +540,7 @@ class FlowMeter(object):
             lpm = int(self._k * (f + self._q))
 
             if lpm not in range(self._MIN_LPM, self._MAX_LPM + 1):
-                self._logger.debug("RPM is out of range! Value: {}".format(lpm))
+                self._logger.debug("Flow is out of range! Value: {}".format(lpm))
                 lpm = self._MAX_LPM
 
         return lpm
@@ -574,8 +574,8 @@ class PressureTransducer(object):
 
         if parent.configuration is not None:
             try:
-                self._k = parent.configuration['tlak']['k']
-                self._q = parent.configuration['tlak']['q']
+                self._k = parent.configuration['pressure']['k']
+                self._q = parent.configuration['pressure']['q']
             except KeyError or AttributeError:
                 self._logger.warning("Pressure variables are not properly defined in a config!")
                 self._k = PRESSURE_K_DEFAULT_VALUE
@@ -691,7 +691,7 @@ class RpmMeter(object):
 
         if parent.configuration is not None:
             try:
-                self._k_multiplier = parent.configuration['otacky']['k']
+                self._k_multiplier = parent.configuration['revs']['k']
             except KeyError or AttributeError:
                 self._logger.warning("RPM variables are not properly defined in a config!")
                 self._k_multiplier = RPM_K_DEFAULT_VALUE

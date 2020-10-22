@@ -1,15 +1,15 @@
 {
-  "logovani": {
-    "umisteni": "/home/pi/Desktop/stopwatch_log.csv"
+  "logging": {
+    "location": "/home/pi/Desktop/stopwatch_log.csv"
   },
-  "otacky": {
+  "revs": {
     "k": 1
   },
-  "prutok": {
+  "flow": {
     "k": 8.34,
     "q": 0.229
   },
-  "tlak": {
+  "pressure": {
     "k": 20,
     "q": 0
   }
