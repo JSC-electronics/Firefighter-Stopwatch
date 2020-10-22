@@ -17,10 +17,14 @@ from datetime import datetime as dtime
 from pathlib import Path
 from tkinter import ttk
 
+import gettext
+t = gettext.translation('stopwatch', 'l10n')
+_ = t.gettext
+
 try:
     import busio, board
 except (NotImplementedError, FileNotFoundError):
-    logging.warning('Bussio: Unsupported hardware. Disabling I2C feature.')
+    logging.warning(_('Bussio: Unsupported hardware. Disabling I2C feature.'))
 
 import gpiozero
 
@@ -47,7 +51,7 @@ class MainApp(object):
         self._load_config()
 
         self._parent = parent
-        self._parent.title('Firefighter Stopwatch')
+        self._parent.title(_('Firefighter Stopwatch'))
         self._parent.columnconfigure(0, weight=1)
         self._parent.rowconfigure(0, weight=1)
 
@@ -88,7 +92,7 @@ class MainApp(object):
         # Automatic measurement label
         auto_measurement_label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         auto_measurement_label.grid(column=0, row=1, columnspan=5)
-        auto_measurement_label['text'] = 'Auto measurement'
+        auto_measurement_label['text'] = _('Auto measurement')
 
         # Icons
         icon_images = ['gfx/clock_icon.png', 'gfx/rpm_icon.png', 'gfx/flow_icon.png', 'gfx/pressure_icon.png']
@@ -101,7 +105,7 @@ class MainApp(object):
             label.grid(column=icon_col, row=2)
             icon_col += 1
 
-        icon_units = ['', '(RPM)', '(l/min)', '(bar)']
+        icon_units = ['', _('(RPM)'), _('(l/min)'), _('(bar)')]
         icon_col = 1
         for unit in icon_units:
             label = ttk.Label(content_frame, style='Customized.Main.TLabel', text=unit)
@@ -138,7 +142,7 @@ class MainApp(object):
         # Manual measurement label
         label = ttk.Label(content_frame, style='Customized.Main.TLabel', padding=20)
         label.grid(column=0, row=8, columnspan=5)
-        label['text'] = 'Manual measurement'
+        label['text'] = _('Manual measurement')
 
         self._manual_measurement_labels = {'split_times': [], 'rpm': [], 'flow': [], 'pressure': [],
                                            'symbol_label': None}
@@ -248,9 +252,9 @@ class MainApp(object):
         def write_log_to_csv(checkpoint='', split_time='', flow='', rpm='',
                              pressure_1='', pressure_2='', is_manual_measure=False):
             write_header = False
-            header = ['Measurement date and time', 'Checkpoint', 'Time', 'Flow (l/min)',
-                      'Engine revs (1/min)', 'Pressure #1 (bar)', 'Pressure #2 (bar)',
-                      'Flag for auto/manual measurement {A, M}']
+            header = [_('Measurement date and time'), _('Checkpoint'), _('Time'), _('Flow (l/min)'),
+                      _('Engine revs (1/min)'), _('Pressure #1 (bar)'), _('Pressure #2 (bar)'),
+                      _('Flag for auto/manual measurement {A, M}')]
 
             data = [dtime.now().isoformat(), checkpoint, split_time, flow, rpm, pressure_1, pressure_2,
                     'A' if not is_manual_measure else 'M']
@@ -275,7 +279,7 @@ class MainApp(object):
 
                     writer.writerow(data)
             except FileNotFoundError:
-                self._logger.error("Unable to create log file. Check path in \'config.json\'.")
+                self._logger.error(_("Unable to create log file. Check path in \'config.json\'."))
 
         def get_row_for_checkpoint(checkpoint: int):
             # checkpoint -> row mapping
@@ -336,7 +340,7 @@ class MainApp(object):
                                          pressure_2=str(pressure[1]), is_manual_measure=True)
 
                 if checkpoint is not None:
-                    self._logger.info("Split time measured on checkpoint {}".format(checkpoint))
+                    self._logger.info(_("Split time measured on checkpoint {}").format(checkpoint))
 
         except queue.Empty:
             pass
@@ -409,8 +413,8 @@ class StopWatch(object):
                              'manual_measure_button': manual_measure_button, 'reset_button': reset_button}
         except:
             logging.warning(
-                'Gpiozero: Unable to load pin factory. Most probably, you\'re running this application on a PC. '
-                'In this case, you can setup remote GPIO. See the docs.')
+                _('Gpiozero: Unable to load pin factory. Most probably, you\'re running this application on a PC. '
+                  'In this case, you can setup remote GPIO. See the docs.'))
             self._buttons = {}
 
     @property
@@ -427,7 +431,7 @@ class StopWatch(object):
     def _measure_first_split_time(self):
         if self.is_running:
             if self._first_split_time_measured:
-                self._logger.warning("Repeated measure on checkpoint 3")
+                self._logger.warning(_("Repeated measure on checkpoint 3"))
                 return
 
             self._measure_split_time(checkpoint=3)
@@ -437,14 +441,14 @@ class StopWatch(object):
         if self._first_split_time_measured and self.is_running:
             if button_id == self._buttons['stop_button_1']:
                 if self._checkpoint_1_measured:
-                    self._logger.warning("Repeated measure on checkpoint 1")
+                    self._logger.warning(_("Repeated measure on checkpoint 1"))
                     return
 
                 self._measure_split_time(checkpoint=1)
                 self._checkpoint_1_measured = True
             elif button_id == self._buttons['stop_button_2']:
                 if self._checkpoint_2_measured:
-                    self._logger.warning("Repeated measure on checkpoint 2")
+                    self._logger.warning(_("Repeated measure on checkpoint 2"))
                     return
 
                 self._measure_split_time(checkpoint=2)
@@ -518,7 +522,7 @@ class FlowMeter(object):
                 self._k = parent.configuration['flow']['k']
                 self._q = parent.configuration['flow']['q']
             except KeyError or AttributeError:
-                self._logger.warning("Flow variables are not properly defined in a config!")
+                self._logger.warning(_("Flow variables are not properly defined in a config!"))
                 self._k = FLOW_K_DEFAULT_VALUE
                 self._q = FLOW_Q_DEFAULT_VALUE
 
@@ -540,7 +544,7 @@ class FlowMeter(object):
             lpm = int(self._k * (f + self._q))
 
             if lpm not in range(self._MIN_LPM, self._MAX_LPM + 1):
-                self._logger.debug("Flow is out of range! Value: {}".format(lpm))
+                self._logger.debug(_("Flow is out of range! Value: {}").format(lpm))
                 lpm = self._MAX_LPM
 
         return lpm
@@ -577,7 +581,7 @@ class PressureTransducer(object):
                 self._k = parent.configuration['pressure']['k']
                 self._q = parent.configuration['pressure']['q']
             except KeyError or AttributeError:
-                self._logger.warning("Pressure variables are not properly defined in a config!")
+                self._logger.warning(_("Pressure variables are not properly defined in a config!"))
                 self._k = PRESSURE_K_DEFAULT_VALUE
                 self._q = PRESSURE_Q_DEFAULT_VALUE
 
@@ -639,7 +643,7 @@ class PressureTransducer(object):
         pressure = int(self._k * voltage + self._q)
 
         if pressure not in range(self._MIN_PRESSURE, self._MAX_PRESSURE + 1):
-            self._logger.debug("Pressure is out of range! Value: {}".format(pressure))
+            self._logger.debug(_("Pressure is out of range! Value: {}").format(pressure))
             pressure = self._MAX_PRESSURE
 
         return pressure
@@ -693,7 +697,7 @@ class RpmMeter(object):
             try:
                 self._k_multiplier = parent.configuration['revs']['k']
             except KeyError or AttributeError:
-                self._logger.warning("RPM variables are not properly defined in a config!")
+                self._logger.warning(_("RPM variables are not properly defined in a config!"))
                 self._k_multiplier = RPM_K_DEFAULT_VALUE
 
         try:
@@ -716,7 +720,7 @@ class RpmMeter(object):
             rpm = int(freq * 60)
 
             if rpm not in range(self._MIN_RPM, self._MAX_RPM + 1):
-                self._logger.debug("RPM is out of range! Value: {}".format(rpm))
+                self._logger.debug(_("RPM is out of range! Value: {}").format(rpm))
                 rpm = self._MAX_RPM
 
             return rpm
@@ -734,8 +738,8 @@ class RpmMeter(object):
         avg = avg / float(self._AVG_SAMPLES)
         return avg
 
-    def get_exp_avg(self, currentExpAvg, newSample):
-        avg = (1 - self._alpha) * currentExpAvg + self._alpha * newSample
+    def get_exp_avg(self, current_exp_avg, new_sample):
+        avg = (1 - self._alpha) * current_exp_avg + self._alpha * new_sample
         return avg
 
 
