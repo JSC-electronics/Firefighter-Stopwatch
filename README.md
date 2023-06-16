@@ -2,9 +2,9 @@
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/JSC-electronics/Adeon/blob/master/LICENSE)
 [![Donate](https://img.shields.io/badge/donate-PayPal-blueviolet.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SESX9ABM7V8KA&source=url)
 
-This repository contains the code we originally developed to assist with Firefighter competitions. You can read about it in [our blog post][firefighter-stopwatch].
+This repository contains the code we originally developed to assist with Firefighter competitions.
 
-<img src="https://github.com/vzahradnik/vzahradnik-blog/raw/master/content/posts/2019-06-17-stopwatch-for-firefighter-competitions/images/stopwatch-gui.gif">
+<img src="images/stopwatch-gui.gif">
 
 ## Features
 - Measure split time and total time for each team
@@ -84,7 +84,6 @@ Copyright (c) 2019-2020 JSC electronics. All rights reserved.
 Licensed under the [Apache-2.0](LICENSE) license.
 
 [//]: # (Used references)
-[firefighter-stopwatch]: https://www.zahradnik.io/stopwatch-for-firefighter-competitions
 [tkinter]: https://docs.python.org/3/library/tkinter.html
 [pillow]: https://python-pillow.org/
 [gpiozero]: https://gpiozero.readthedocs.io/en/stable/
